@@ -1,0 +1,138 @@
+--- src/pages/TaskView.tsx
++++ src/pages/TaskView.tsx
+@@ -23,6 +23,8 @@
+   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
+   const [bibliography, setBibliography] = useState<string>('');
+   const [forumContext, setForumContext] = useState<string>('');
++  const [groupDraftText, setGroupDraftText] = useState<string>('');
++  const [groupDraftFile, setGroupDraftFile] = useState<File | null>(null);
+   
+   const [chatHistory, setChatHistory] = useState<{role: 'user'|'assistant', content: string}[]>([]);
+   const [chatMessage, setChatMessage] = useState('');
+@@ -46,6 +48,9 @@
+       localforage.getItem<File[]>(`task-${taskId}-additional`).then(f => {
+         if (f) setAdditionalFiles(f);
+       });
++      localforage.getItem<File>(`task-${taskId}-draft`).then(f => {
++        if (f) setGroupDraftFile(f);
++      });
+     }
+   }, [taskId]);
+ 
+@@ -54,7 +59,8 @@
+     try {
+       await updateDoc(doc(db, 'users', user.uid, 'tasks', taskId), {
+         forumContext,
+-        bibliography
++        bibliography,
++        groupDraftText
+       });
+     } catch (e) { console.error('Error saving context', e); }
+   };
+@@ -73,6 +79,7 @@
+         setTask(taskData);
+         setForumContext(taskData.forumContext || '');
+         setBibliography(taskData.bibliography || '');
++        setGroupDraftText(taskData.groupDraftText || '');
+       } else {
+         navigate(`/course/${courseId}`);
+         return;
+@@ -113,6 +120,19 @@
+     localforage.removeItem(`task-${taskId}-additional`);
+   };
+ 
++  const handleGroupDraftUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
++    if (e.target.files && e.target.files[0]) {
++      const file = e.target.files[0];
++      setGroupDraftFile(file);
++      localforage.setItem(`task-${taskId}-draft`, file);
++    }
++  };
++
++  const clearGroupDraftFile = () => {
++    setGroupDraftFile(null);
++    localforage.removeItem(`task-${taskId}-draft`);
++  };
++
+   const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+     const reader = new FileReader();
+     reader.readAsDataURL(file);
+@@ -194,6 +214,10 @@
+              } catch (e) {}
+          }
+       }
++      let groupDraftBase64 = null;
++      if (groupDraftFile) {
++         try { groupDraftBase64 = await toBase64(groupDraftFile); } catch (e) {}
++      }
+ 
+       const effectiveProfile = course?.programOverride ? { ...profile, program: course.programOverride } : profile;
+ 
+@@ -206,8 +230,10 @@
+           profile: effectiveProfile,
+           history: newHistory,
+           forumContext,
+           guideBase64,
+-          additionalFilesBase64
++          additionalFilesBase64,
++          groupDraftText,
++          groupDraftBase64
+         })
+       });
+       const data = await res.json();
+@@ -282,6 +308,10 @@
+              } catch (e) {}
+          }
+       }
++      let groupDraftBase64 = null;
++      if (groupDraftFile) {
++         try { groupDraftBase64 = await toBase64(groupDraftFile); } catch (e) {}
++      }
+ 
+       const effectiveProfile = course?.programOverride ? { ...profile, program: course.programOverride } : profile;
+       const res = await fetch('/api/task-chat', {
+@@ -294,8 +324,10 @@
+           history: newHistory,
+           forumContext,
+           image: base64Image,
+           guideBase64,
+-          additionalFilesBase64
++          additionalFilesBase64,
++          groupDraftText,
++          groupDraftBase64
+         })
+       });
+       const data = await res.json();
+@@ -370,6 +402,29 @@
+             <textarea
+               value={forumContext}
+               onChange={e => setForumContext(e.target.value)}
+               onBlur={saveContextToDb}
+               placeholder="Pega aquí aportes de compañeros en el foro..."
+               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
+             />
+           </div>
++
++          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
++            <h3 className="font-semibold mb-3">4. Avance del Grupo (Auditoría)</h3>
++            <p className="text-xs text-slate-400 mb-3">Sube el documento de tus compañeros para saber qué falta y generar tu aporte sin dañar el de ellos.</p>
++            <label className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors mb-3">
++              <Upload className="w-4 h-4" />
++              <span className="text-sm truncate max-w-[200px]">{groupDraftFile ? groupDraftFile.name : 'Subir avance (.docx/pdf/img)'}</span>
++              <input type="file" onChange={handleGroupDraftUpload} className="hidden" />
++            </label>
++            {groupDraftFile && (
++               <div className="flex justify-end mb-3">
++                 <button onClick={clearGroupDraftFile} className="text-xs text-red-400 hover:text-red-300">
++                   Eliminar archivo de avance
++                 </button>
++               </div>
++            )}
++            <textarea
++              value={groupDraftText}
++              onChange={e => setGroupDraftText(e.target.value)}
++              onBlur={saveContextToDb}
++              placeholder="O pega aquí el texto del avance de tus compañeros..."
++              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
++            />
++          </div>

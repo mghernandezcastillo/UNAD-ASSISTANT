@@ -1,0 +1,62 @@
+--- src/pages/TaskView.tsx
++++ src/pages/TaskView.tsx
+@@ -171,6 +171,19 @@
+     setChatMessage('');
+     
+     try {
++      let guideBase64 = null;
++      if (guideFile) {
++         try { guideBase64 = await toBase64(guideFile); } catch (e) {}
++      }
++      let additionalFilesBase64 = [];
++      if (additionalFiles.length > 0) {
++         for (const file of additionalFiles) {
++             try {
++                 additionalFilesBase64.push(await toBase64(file));
++             } catch (e) {}
++         }
++      }
++
+       const effectiveProfile = course?.programOverride ? { ...profile, program: course.programOverride } : profile;
+ 
+       const res = await fetch('/api/task-chat', {
+@@ -182,6 +195,8 @@
+           profile: effectiveProfile,
+           history: newHistory,
+           forumContext,
++          guideBase64,
++          additionalFilesBase64
+         })
+       });
+       const data = await res.json();
+@@ -235,6 +250,19 @@
+     setChatHistory(newHistory);
+     
+     try {
++      let guideBase64 = null;
++      if (guideFile) {
++         try { guideBase64 = await toBase64(guideFile); } catch (e) {}
++      }
++      let additionalFilesBase64 = [];
++      if (additionalFiles.length > 0) {
++         for (const file of additionalFiles) {
++             try {
++                 additionalFilesBase64.push(await toBase64(file));
++             } catch (e) {}
++         }
++      }
++
+       const effectiveProfile = course?.programOverride ? { ...profile, program: course.programOverride } : profile;
+       const res = await fetch('/api/task-chat', {
+         method: 'POST',
+@@ -246,7 +274,9 @@
+           profile: effectiveProfile,
+           history: newHistory,
+           forumContext,
+-          image: base64Image
++          image: base64Image,
++          guideBase64,
++          additionalFilesBase64
+         })
+       });
+       const data = await res.json();

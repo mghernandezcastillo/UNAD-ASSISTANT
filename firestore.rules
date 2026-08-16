@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidUserProfile(data, expectedUserId) {
+      return data.keys().hasAll(['userId', 'name', 'createdAt', 'updatedAt'])
+        && data.userId == expectedUserId
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.createdAt is number
+        && data.updatedAt is number
+        // Optional fields check
+        && (data.get('idDocument', '') is string)
+        && (data.get('age', 0) is number)
+        && (data.get('program', '') is string)
+        && (data.get('country', '') is string)
+        && (data.get('city', '') is string)
+        && (data.get('cead', '') is string)
+        && (data.get('school', '') is string)
+        && (data.get('zone', '') is string)
+        && (data.get('center', '') is string);
+    }
+
+    function isValidCourse(data, expectedUserId, expectedCourseId) {
+      return data.keys().hasAll(['courseId', 'userId', 'name', 'createdAt', 'updatedAt'])
+        && data.courseId == expectedCourseId
+        && data.userId == expectedUserId
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && data.createdAt is number
+        && data.updatedAt is number
+        && (data.get('code', '') is string)
+        && (data.get('credits', 0) is number);
+    }
+
+    function isValidTask(data, expectedUserId, expectedTaskId) {
+      return data.keys().hasAll(['taskId', 'courseId', 'userId', 'title', 'createdAt', 'updatedAt'])
+        && data.taskId == expectedTaskId
+        && data.userId == expectedUserId
+        && data.courseId is string && data.courseId.size() > 0
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.createdAt is number
+        && data.updatedAt is number
+        && (data.get('description', '') is string)
+        && (data.get('status', 'pending') in ['pending', 'in-progress', 'completed'])
+        && (data.get('type', 'individual') in ['individual', 'collaborative'])
+        && (data.get('docUrl', '') is string);
+    }
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /templates/{templateId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /courses/{courseId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId)
+                      && isValidId(userId)
+                      && isValidId(courseId)
+                      && isValidCourse(incoming(), userId, courseId)
+                      // Force checking that the user doc exists (so orphaned subcollections don't happen)
+                      && exists(/databases/$(database)/documents/users/$(userId));
+        allow update: if isOwner(userId)
+                      && isValidId(userId)
+                      && isValidId(courseId)
+                      && isValidCourse(incoming(), userId, courseId)
+                      && incoming().userId == existing().userId
+                      && incoming().courseId == existing().courseId
+                      && incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(userId);
+      }
+
+      match /tasks/{taskId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId)
+                      && isValidId(userId)
+                      && isValidId(taskId)
+                      && isValidTask(incoming(), userId, taskId)
+                      // Make sure course exists and is owned
+                      && exists(/databases/$(database)/documents/users/$(userId)/courses/$(incoming().courseId));
+        allow update: if isOwner(userId)
+                      && isValidId(userId)
+                      && isValidId(taskId)
+                      && isValidTask(incoming(), userId, taskId)
+                      && incoming().userId == existing().userId
+                      && incoming().taskId == existing().taskId
+                      && incoming().courseId == existing().courseId
+                      && incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

@@ -1,0 +1,76 @@
+--- src/pages/TaskView.tsx
++++ src/pages/TaskView.tsx
+@@ -5,6 +5,7 @@
+ import { ArrowLeft, FileText, Upload, Sparkles, Monitor, Play, Check, Send } from 'lucide-react';
+ import ReactMarkdown from 'react-markdown';
+ import { useGoogleLogin } from '@react-oauth/google';
++import localforage from 'localforage';
+ 
+ export function TaskView() {
+   const { courseId, taskId } = useParams<{ courseId: string; taskId: string }>();
+@@ -40,6 +41,18 @@
+     }
+   });
+ 
++  useEffect(() => {
++    if (taskId) {
++      localforage.getItem<File>(`task-${taskId}-guide`).then(f => {
++        if (f) setGuideFile(f);
++      });
++      localforage.getItem<File[]>(`task-${taskId}-additional`).then(f => {
++        if (f) setAdditionalFiles(f);
++      });
++    }
++  }, [taskId]);
++
+   const saveContextToDb = async () => {
+     if (!user || !taskId) return;
+     try {
+@@ -82,13 +95,21 @@
+ 
+   const handleGuideUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+     if (e.target.files && e.target.files[0]) {
+-      setGuideFile(e.target.files[0]);
++      const file = e.target.files[0];
++      setGuideFile(file);
++      localforage.setItem(`task-${taskId}-guide`, file);
+     }
+   };
+ 
+   const handleAdditionalFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+     if (e.target.files) {
+-      setAdditionalFiles(Array.from(e.target.files));
++      const files = Array.from(e.target.files);
++      setAdditionalFiles(prev => {
++        const newFiles = [...prev, ...files];
++        // Filter out duplicates by name just in case
++        const uniqueFiles = newFiles.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
++        localforage.setItem(`task-${taskId}-additional`, uniqueFiles);
++        return uniqueFiles;
++      });
+     }
+   };
+ 
++  const clearAdditionalFiles = () => {
++    setAdditionalFiles([]);
++    localforage.removeItem(`task-${taskId}-additional`);
++  };
++
+   const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+     const reader = new FileReader();
+     reader.readAsDataURL(file);
+@@ -345,11 +366,17 @@
+               <span className="text-sm">Subir archivos</span>
+               <input type="file" multiple onChange={handleAdditionalFiles} className="hidden" />
+             </label>
+             {additionalFiles.length > 0 && (
+-              <p className="text-xs text-slate-400 mt-2">{additionalFiles.length} archivos seleccionados</p>
++              <div className="flex items-center justify-between mt-2">
++                <p className="text-xs text-slate-400">{additionalFiles.length} archivos guardados en memoria</p>
++                <button onClick={clearAdditionalFiles} className="text-xs text-red-400 hover:text-red-300">
++                  Limpiar anexos
++                </button>
++              </div>
+             )}
+           </div>
+ 

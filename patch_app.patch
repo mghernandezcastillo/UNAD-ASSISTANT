@@ -1,0 +1,33 @@
+--- api/app.ts
++++ api/app.ts
+@@ -690,6 +690,26 @@
+   }
+ });
+ 
++app.post("/api/extract-tutor", async (req, res) => {
++  try {
++    const { text } = req.body || {};
++    if (!text || text.trim() === "") {
++      return res.json({ tutor: null });
++    }
++    const { ai } = await getGenAI();
++    
++    const response = await ai.models.generateContent({
++      model: "gemini-2.5-flash",
++      contents: [{ text: `Analiza el siguiente texto (aportes de foro) y extrae el nombre del tutor, profesor o director del curso si se menciona explícitamente. Responde ÚNICAMENTE con el nombre de la persona (ej. "Carlos Martinez"). Si no se menciona a ningún tutor, profesor, o director, o no estás seguro, responde exactamente con la palabra "NO_ENCONTRADO".\n\nTexto: ${text}` }]
++    });
++
++    const result = response.text?.trim() || "NO_ENCONTRADO";
++    if (result === "NO_ENCONTRADO" || result.toLowerCase().includes("no encontrado") || result.toLowerCase().includes("no_encontrado")) {
++      return res.json({ tutor: null });
++    }
++    return res.json({ tutor: result });
++  } catch (err: any) {
++    console.error("[SERVER /api/extract-tutor ERROR]", err);
++    return res.status(500).json({ error: "Error extrayendo tutor" });
++  }
++});
++
+ app.post("/api/task-chat", async (req, res) => {
+   try {
+     const { task, course, profile, history, forumContext, image, guideBase64, additionalFilesBase64 } = req.body || {};

@@ -1,0 +1,35 @@
+--- api/app.ts
++++ api/app.ts
+@@ -693,7 +693,7 @@
+ 
+ app.post("/api/task-chat", async (req, res) => {
+   try {
+-    const { task, course, profile, history } = req.body || {};
++    const { task, course, profile, history, forumContext, image } = req.body || {};
+     const { ai } = await getGenAI();
+ 
+     let systemInstruction = `Eres un asistente experto para estudiantes de la Universidad Nacional Abierta y a Distancia (UNAD). 
+@@ -710,12 +710,24 @@
+     for (let i = 0; i < history.length - 1; i++) {
+       conversationContext += `${history[i].role === 'user' ? 'Estudiante' : 'IA'}: ${history[i].content}\n\n`;
+     }
++    
++    if (forumContext) {
++      conversationContext += `Contexto de la actividad (Foro/Apuntes guardados): \n${forumContext}\n\n`;
++    }
++
++    let promptParts: any[] = [];
++    if (image) {
++      promptParts.push({ inlineData: { mimeType: 'image/jpeg', data: image } });
++      promptParts.push({ text: `${systemInstruction}\n\n${conversationContext}\n\nEl estudiante ha enviado una captura de pantalla junto con este mensaje:\nEstudiante: ${recentMessage.content}\nIA:` });
++    } else {
++      promptParts.push({ text: `${systemInstruction}\n\n${conversationContext}\n\nEstudiante: ${recentMessage.content}\nIA:` });
++    }
+ 
+     const response = await ai.models.generateContent({
+       model: "gemini-2.5-flash",
+-      contents: `${systemInstruction}\n\n${conversationContext}\n\nEstudiante: ${recentMessage.content}\nIA:`,
++      contents: promptParts,
+     });
+ 
+     return res.json({ answer: response.text?.trim() || "Lo siento, no pude procesar eso." });

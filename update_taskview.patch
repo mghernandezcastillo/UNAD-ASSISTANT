@@ -1,0 +1,122 @@
+--- src/pages/TaskView.tsx
++++ src/pages/TaskView.tsx
+@@ -43,6 +43,15 @@
+     }
+   });
+ 
++  const saveContextToDb = async () => {
++    if (!user || !taskId) return;
++    try {
++      await updateDoc(doc(db, 'users', user.uid, 'tasks', taskId), {
++        forumContext,
++        bibliography
++      });
++    } catch (e) { console.error('Error saving context', e); }
++  };
++
+   useEffect(() => {
+     if (user && courseId && taskId) {
+       fetchData();
+@@ -73,6 +82,8 @@
+           setIsProcessing(false);
+           alert('Sube la guía de actividades obligatoria (PDF).');
+           return;
+         }
++        setForumContext(taskData.forumContext || '');
++        setBibliography(taskData.bibliography || '');
+       } catch (err) {
+         console.error(err);
+@@ -145,18 +156,22 @@
+   const sendChatMessage = async () => {
+     if (!chatMessage.trim()) return;
+     const newHistory = [...chatHistory, { role: 'user' as const, content: chatMessage }];
+     setChatHistory(newHistory);
+     setChatMessage('');
+     
+     try {
+       const effectiveProfile = course?.programOverride ? { ...profile, program: course.programOverride } : profile;
+ 
+       const res = await fetch('/api/task-chat', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+           task,
+           course,
+           profile: effectiveProfile,
+           history: newHistory,
++          forumContext,
+         })
+       });
+       const data = await res.json();
+@@ -204,6 +219,41 @@
+     }
+   };
+ 
++  const captureAndAnalyze = async () => {
++    if (!videoRef.current) return;
++    
++    // Create a canvas to capture the frame
++    const canvas = document.createElement('canvas');
++    canvas.width = videoRef.current.videoWidth;
++    canvas.height = videoRef.current.videoHeight;
++    const ctx = canvas.getContext('2d');
++    if (!ctx) return;
++    
++    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
++    const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
++    
++    const newHistory = [...chatHistory, { role: 'user' as const, content: '[Captura de pantalla enviada para análisis]' }];
++    setChatHistory(newHistory);
++    
++    try {
++      const effectiveProfile = course?.programOverride ? { ...profile, program: course.programOverride } : profile;
++      const res = await fetch('/api/task-chat', {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({
++          task,
++          course,
++          profile: effectiveProfile,
++          history: newHistory,
++          forumContext,
++          image: base64Image
++        })
++      });
++      const data = await res.json();
++      setChatHistory([...newHistory, { role: 'assistant', content: data.answer || 'Sin respuesta' }]);
++    } catch (err) {
++      console.error(err);
++      setChatHistory([...newHistory, { role: 'assistant', content: 'Error analizando la imagen.' }]);
++    }
++  };
++
+   if (loading || !task) return <div className="min-h-screen bg-[#020617] text-slate-400 p-6">Cargando...</div>;
+ 
+@@ -246,12 +296,14 @@
+             <textarea
+               value={bibliography}
+               onChange={e => setBibliography(e.target.value)}
++              onBlur={saveContextToDb}
+               placeholder="Pega aquí los contenidos o referentes bibliográficos..."
+               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 mb-3 h-20 resize-none"
+             />
+             <textarea
+               value={forumContext}
+               onChange={e => setForumContext(e.target.value)}
++              onBlur={saveContextToDb}
+               placeholder="Pega aquí aportes de compañeros en el foro..."
+               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
+             />
+@@ -286,6 +338,9 @@
+              {screenStream && (
++                <>
+                 <div className="mt-3 rounded-lg overflow-hidden border border-slate-700">
+                   <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-video object-cover bg-black" />
+                 </div>
++                <button onClick={captureAndAnalyze} className="w-full mt-3 py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold flex items-center justify-center space-x-2">
++                  <Sparkles className="w-4 h-4" />
++                  <span>Analizar Pantalla</span>
++                </button>
++                </>
+              )}
+           </div>
