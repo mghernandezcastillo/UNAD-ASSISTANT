@@ -1,12 +1,10 @@
 {
-  "projectId": "bamboo-discovery-8v8b6",
-  "appId": "1:314310352076:web:92545018526324f61f3669",
-  "apiKey": "AIzaSyCfad5Q6R9G-tsLH-U4XUpK6DgdD_oq5vo",
-  "authDomain": "bamboo-discovery-8v8b6.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-unadstudentassis-3128e0a0-77c0-4328-a4cf-5473c6603b1a",
-  "storageBucket": "bamboo-discovery-8v8b6.firebasestorage.app",
-  "messagingSenderId": "314310352076",
-  "measurementId": "",
-  "oAuthClientId": "314310352076-ek1knpai6f98nhd0742niu2evscv7pje.apps.googleusercontent.com",
-  "recaptchaSiteKey": ""
+  "apiKey": "AIzaSyDNuHgklNY9yaZ6aCWzgvykh_41QvXC5XA",
+  "authDomain": "curso-android-firebase-1eba7.firebaseapp.com",
+  "databaseURL": "https://curso-android-firebase-1eba7-default-rtdb.firebaseio.com",
+  "projectId": "curso-android-firebase-1eba7",
+  "storageBucket": "curso-android-firebase-1eba7.appspot.com",
+  "messagingSenderId": "804587008847",
+  "appId": "1:804587008847:web:4d7e92ccc266e0d8910b3a",
+  "measurementId": "G-HL8SG8D661"
 }
