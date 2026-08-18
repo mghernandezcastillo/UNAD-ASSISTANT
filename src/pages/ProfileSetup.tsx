@@ -204,8 +204,7 @@ export function ProfileSetup() {
       } finally {
         setIsTestingDocs(false);
       }
-    },
-    scope: 'https://www.googleapis.com/auth/documents'
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
