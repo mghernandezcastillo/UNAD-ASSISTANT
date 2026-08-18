@@ -64,45 +64,94 @@ export function Dashboard() {
     }
   };
 
+  const compressImageFile = (file: File): Promise<{ base64: string; mimeType: string }> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => {
+          const MAX_DIM = 1600;
+          let { width, height } = img;
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = Math.round((height * MAX_DIM) / width);
+              width = MAX_DIM;
+            } else {
+              width = Math.round((width * MAX_DIM) / height);
+              height = MAX_DIM;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve({ base64: e.target?.result as string, mimeType: file.type || 'image/jpeg' });
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          const mime = 'image/jpeg';
+          const compressedBase64 = canvas.toDataURL(mime, 0.85);
+          resolve({ base64: compressedBase64, mimeType: mime });
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
     try {
       setUploading(true);
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64data = reader.result as string;
-        const res = await fetch('/api/extract-courses', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: base64data, mimeType: file.type })
-        });
-        const data = await res.json();
-        
-        if (data.courses && data.courses.length > 0) {
-          // Save to Firestore
-          for (const course of data.courses) {
-            const courseId = `course_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            await setDoc(doc(db, 'users', user.uid, 'courses', courseId), {
-              courseId,
-              userId: user.uid,
-              name: course.name,
-              code: course.code || '',
-              credits: course.credits || 0,
-              createdAt: Date.now(),
-              updatedAt: Date.now()
-            });
-          }
-          await fetchCourses();
-        } else {
-          alert('No se encontraron cursos en la imagen.');
+      const { base64: base64data, mimeType } = await compressImageFile(file);
+
+      const res = await fetch('/api/extract-courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64data, mimeType })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        let errMsg = 'Error en el servidor al analizar la imagen.';
+        try {
+          const errObj = JSON.parse(errText);
+          if (errObj.error) errMsg = errObj.error;
+        } catch {
+          if (errText) errMsg = errText;
         }
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
+        throw new Error(errMsg);
+      }
+
+      const data = await res.json();
+      
+      if (data.courses && data.courses.length > 0) {
+        // Save to Firestore
+        for (const course of data.courses) {
+          const courseId = `course_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          await setDoc(doc(db, 'users', user.uid, 'courses', courseId), {
+            courseId,
+            userId: user.uid,
+            name: course.name,
+            code: course.code || '',
+            credits: course.credits || 0,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          });
+        }
+        await fetchCourses();
+        alert(`¡Se detectaron y agregaron ${data.courses.length} cursos exitosamente!`);
+      } else {
+        alert('No se encontraron cursos en la imagen. Intenta con una imagen más clara o donde se lean bien los nombres.');
+      }
+    } catch (err: any) {
       console.error(err);
-      alert('Error procesando imagen');
+      alert('Error procesando imagen: ' + (err?.message || err));
     } finally {
       setUploading(false);
       if (e.target) e.target.value = '';

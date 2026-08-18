@@ -57,24 +57,39 @@ app.post("/api/extract-courses", async (req, res) => {
     const { imageBase64, mimeType } = req.body || {};
 
     if (!imageBase64) {
-      return res.status(400).json({ error: "No image data provided." });
+      return res.status(400).json({ error: "No se recibió ninguna imagen.", courses: [] });
+    }
+
+    if (!getGeminiApiKey()) {
+      return res.status(503).json({
+        error: "Falta configurar GEMINI_API_KEY o GOOGLE_API_KEY en las variables de entorno de Vercel/servidor.",
+        code: "GEMINI_API_KEY_MISSING",
+        courses: []
+      });
     }
 
     const { ai, Type } = await getGenAI();
-    const cleanBase64 = imageBase64.includes(",") ? imageBase64.split(",")[1] : imageBase64.replace(/^data:[^;]+;base64,/, "");
+    const cleanBase64 = imageBase64.includes(",") 
+      ? imageBase64.split(",")[1] 
+      : imageBase64.replace(/^data:[^;]+;base64,/, "");
+
+    const detectedMime = (mimeType && mimeType.startsWith("image/")) ? mimeType : "image/jpeg";
 
     const promptText = `
-Analiza esta imagen que parece ser un pantallazo de los cursos matriculados de la UNAD.
-Extrae la lista de cursos que el estudiante está cursando.
-Para cada curso intenta obtener el código, nombre y créditos. A veces solo sale el nombre y el código en el formato "NOMBRE DEL CURSO (XXXXX)".
-Retorna un array JSON con los cursos encontrados.
+Analiza esta imagen que es una captura de pantalla de los cursos matriculados de la UNAD (Universidad Nacional Abierta y a Distancia).
+Extrae la lista completa de todos los cursos que aparecen matriculados.
+Para cada curso:
+- name: Nombre oficial del curso (ej: "LEGISLACIÓN COMERCIAL Y TRIBUTARIA")
+- code: Código o número del curso si aparece (ej: "102011" o "(102011)"), o texto vacío si no se encuentra.
+- credits: Número de créditos académicos si aparece (ej: 3), o 0 si no se encuentra.
+Retorna únicamente el array JSON estructurado.
 `;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: {
         parts: [
-          { inlineData: { mimeType: mimeType || "image/jpeg", data: cleanBase64 } },
+          { inlineData: { mimeType: detectedMime, data: cleanBase64 } },
           { text: promptText },
         ],
       },
@@ -95,11 +110,26 @@ Retorna un array JSON con los cursos encontrados.
       }
     });
 
-    return res.json({ courses: JSON.parse(response.text || "[]") });
+    let rawText = (response.text || "").trim();
+    if (rawText.startsWith("```json")) {
+      rawText = rawText.replace(/^```json/i, "").replace(/```$/, "").trim();
+    } else if (rawText.startsWith("```")) {
+      rawText = rawText.replace(/^```/i, "").replace(/```$/, "").trim();
+    }
+
+    let parsedCourses = [];
+    try {
+      parsedCourses = JSON.parse(rawText || "[]");
+    } catch (parseError) {
+      console.warn("[SERVER /api/extract-courses] Error parsing Gemini JSON:", rawText);
+      parsedCourses = [];
+    }
+
+    return res.json({ courses: Array.isArray(parsedCourses) ? parsedCourses : [] });
 
   } catch (err: any) {
     console.error("[SERVER /api/extract-courses]", err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err?.message || "Error procesando la imagen con IA", courses: [] });
   }
 });
 
