@@ -73,6 +73,7 @@ export function ProfileSetup() {
   };
 
   const testGoogleLogin = useGoogleLogin({
+    scope: 'https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive.file',
     onSuccess: async (tokenResponse) => {
       try {
         setIsTestingDocs(true);
@@ -90,7 +91,11 @@ export function ProfileSetup() {
           })
         });
         
-        if (!createRes.ok) throw new Error('Error creando documento en Google Docs');
+        if (!createRes.ok) {
+          const errData = await createRes.json().catch(() => ({}));
+          console.error('Google Docs API Error:', errData);
+          throw new Error(errData?.error?.message || 'Error creando documento en Google Docs');
+        }
         const docData = await createRes.json();
         const newUrl = `https://docs.google.com/document/d/${docData.documentId}/edit`;
         
