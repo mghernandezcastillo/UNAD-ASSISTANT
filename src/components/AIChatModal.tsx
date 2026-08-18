@@ -155,20 +155,20 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="bg-[#020617]/90 backdrop-blur-2xl border border-white/10 rounded-2xl max-w-xl w-full h-[620px] flex flex-col shadow-2xl relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-100/80 dark:bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="bg-[#020617]/90 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-2xl max-w-xl w-full h-[620px] flex flex-col shadow-2xl relative overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-white/5 border-b border-white/10 backdrop-blur-md">
+        <div className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 border-b border-black/10 dark:border-white/10 backdrop-blur-md">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-cyan-400/10 text-cyan-400 border border-cyan-400/20 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-cyan-400/10 text-cyan-600 dark:text-cyan-400 border border-cyan-400/20 flex items-center justify-center">
               <Bot size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                 Consultar Transcripción y Pantalla
-                <Sparkles size={14} className="text-cyan-400" />
+                <Sparkles size={14} className="text-cyan-600 dark:text-cyan-400" />
               </h3>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
                 Respuesta multimodal con bajísimo consumo de tokens (On-Demand Frame)
               </p>
             </div>
@@ -176,21 +176,21 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-white/10 transition"
+            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white p-1 rounded-xl hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 transition"
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Quick Action Chips */}
-        <div className="p-2.5 bg-slate-950/40 border-b border-white/5 flex gap-2 overflow-x-auto text-[11px] font-semibold text-slate-300">
+        <div className="p-2.5 bg-slate-100/40 dark:bg-slate-950/40 border-b border-black/5 dark:border-white/5 flex gap-2 overflow-x-auto text-[11px] font-semibold text-slate-600 dark:text-slate-300">
           <button
             onClick={() =>
               handleQuickPrompt("Analiza la pregunta de examen visible y da la opción correcta con una frase explicativa.", true)
             }
-            className="px-2.5 py-1 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 rounded-lg flex items-center gap-1 shrink-0 transition"
+            className="px-2.5 py-1 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-400/30 rounded-lg flex items-center gap-1 shrink-0 transition"
           >
-            <Zap size={12} className="text-cyan-400" />
+            <Zap size={12} className="text-cyan-600 dark:text-cyan-400" />
             <span>⚡ Examen en Pantalla</span>
           </button>
 
@@ -206,9 +206,9 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
           <button
             onClick={() => handleQuickPrompt("¿Cuáles son los puntos principales mencionados hasta ahora en el audio?")}
-            className="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 rounded-lg flex items-center gap-1 shrink-0 transition"
+            className="px-2.5 py-1 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-black/10 dark:border-white/10 rounded-lg flex items-center gap-1 shrink-0 transition"
           >
-            <MessageSquare size={12} className="text-slate-400" />
+            <MessageSquare size={12} className="text-slate-500 dark:text-slate-400" />
             <span>📝 Resumir Audio</span>
           </button>
         </div>
@@ -226,7 +226,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold ${
                   msg.role === "user"
                     ? "bg-cyan-500 text-slate-950 shadow-md"
-                    : "bg-white/10 border border-white/10 text-cyan-400"
+                    : "bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/10 text-cyan-600 dark:text-cyan-400"
                 }`}
               >
                 {msg.role === "user" ? <User size={13} /> : <Bot size={13} />}
@@ -236,13 +236,13 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 className={`p-3 rounded-2xl text-xs leading-relaxed ${
                   msg.role === "user"
                     ? "bg-cyan-500 text-slate-950 rounded-tr-none font-medium shadow-lg shadow-cyan-500/20"
-                    : "bg-white/5 border border-white/10 text-slate-200 rounded-tl-none backdrop-blur-md"
+                    : "bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-200 rounded-tl-none backdrop-blur-md"
                 }`}
               >
                 <p className="whitespace-pre-wrap">{msg.content}</p>
                 <span
                   className={`block text-[10px] mt-1 text-right ${
-                    msg.role === "user" ? "text-slate-900/80 font-bold" : "text-slate-400"
+                    msg.role === "user" ? "text-slate-900/80 font-bold" : "text-slate-500 dark:text-slate-400"
                   }`}
                 >
                   {msg.timestamp}
@@ -253,11 +253,11 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
           {isSending && (
             <div className="flex gap-2.5 mr-auto">
-              <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 text-cyan-400 flex items-center justify-center text-xs">
+              <div className="w-7 h-7 rounded-full bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center text-xs">
                 <Bot size={13} />
               </div>
-              <div className="bg-white/5 border border-white/10 p-3 rounded-2xl rounded-tl-none text-xs text-slate-300 flex items-center gap-2 backdrop-blur-md">
-                <Loader2 size={14} className="animate-spin text-cyan-400" />
+              <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-3 rounded-2xl rounded-tl-none text-xs text-slate-600 dark:text-slate-300 flex items-center gap-2 backdrop-blur-md">
+                <Loader2 size={14} className="animate-spin text-cyan-600 dark:text-cyan-400" />
                 <span>Analizando transcripción e imagen de pantalla con Gemini...</span>
               </div>
             </div>
@@ -266,7 +266,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
         {/* Image Attachment Bar */}
         {attachedImage && (
-          <div className="px-3 py-2 bg-slate-950/80 border-t border-white/10 flex items-center justify-between gap-3">
+          <div className="px-3 py-2 bg-slate-100/80 dark:bg-slate-950/80 border-t border-black/10 dark:border-white/10 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 overflow-hidden">
               <img
                 src={attachedImage}
@@ -274,14 +274,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 className="w-12 h-8 object-cover rounded border border-cyan-400/40"
               />
               <div className="text-[11px]">
-                <div className="text-cyan-300 font-bold">Captura de pantalla adjunta</div>
-                <div className="text-[10px] text-slate-400">JPEG Compreso (~800px) • ~258 tokens</div>
+                <div className="text-cyan-700 dark:text-cyan-300 font-bold">Captura de pantalla adjunta</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">JPEG Compreso (~800px) • ~258 tokens</div>
               </div>
             </div>
 
             <button
               onClick={() => setAttachedImage(null)}
-              className="p-1 text-slate-400 hover:text-rose-400 transition"
+              className="p-1 text-slate-500 dark:text-slate-400 hover:text-rose-400 transition"
               title="Quitar captura"
             >
               <Trash2 size={16} />
@@ -290,15 +290,15 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         )}
 
         {/* Input footer */}
-        <form onSubmit={handleSend} className="p-3 bg-white/5 border-t border-white/10 flex items-center gap-2 backdrop-blur-md">
+        <form onSubmit={handleSend} className="p-3 bg-black/5 dark:bg-white/5 border-t border-black/10 dark:border-white/10 flex items-center gap-2 backdrop-blur-md">
           {stream && (
             <button
               type="button"
               onClick={handleAttachScreen}
               className={`p-2 rounded-xl text-xs font-semibold border transition backdrop-blur-md ${
                 attachedImage
-                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-400/40"
-                  : "bg-white/5 hover:bg-white/10 text-slate-300 border-white/10"
+                  ? "bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border-cyan-400/40"
+                  : "bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 text-slate-600 dark:text-slate-300 border-black/10 dark:border-white/10"
               }`}
               title="Adjuntar captura de pantalla actual"
             >
@@ -315,7 +315,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 ? "Haz tu pregunta sobre la imagen o el audio..."
                 : "Escribe tu pregunta sobre el audio o la pantalla..."
             }
-            className="flex-1 bg-slate-950/60 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
+            className="flex-1 bg-slate-100/60 dark:bg-slate-950/60 border border-black/10 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
           />
 
           <button

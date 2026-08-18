@@ -18,36 +18,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="bg-[#020617]/90 backdrop-blur-2xl border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-100/80 dark:bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="bg-[#020617]/90 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-xl hover:bg-white/10 transition"
+          className="absolute top-4 right-4 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white p-1 rounded-xl hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 transition"
         >
           <X size={18} />
         </button>
 
-        <div className="flex items-center gap-2.5 mb-5 pb-3 border-b border-white/10">
-          <div className="p-2 rounded-xl bg-cyan-400/10 text-cyan-400 border border-cyan-400/20">
+        <div className="flex items-center gap-2.5 mb-5 pb-3 border-b border-black/10 dark:border-white/10">
+          <div className="p-2 rounded-xl bg-cyan-400/10 text-cyan-600 dark:text-cyan-400 border border-cyan-400/20">
             <SettingsIcon size={20} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Configuración de Transcripción</h3>
-            <p className="text-xs text-slate-400">Ajusta parámetros de procesamiento e interfaz</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Configuración de Transcripción</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Ajusta parámetros de procesamiento e interfaz</p>
           </div>
         </div>
 
         <div className="space-y-4 text-xs font-sans">
           {/* AI Engine Selection */}
           <div>
-            <label className="block text-slate-200 font-semibold mb-1 flex items-center gap-1.5">
-              <Sliders size={14} className="text-cyan-400" />
+            <label className="block text-slate-700 dark:text-slate-200 font-semibold mb-1 flex items-center gap-1.5">
+              <Sliders size={14} className="text-cyan-600 dark:text-cyan-400" />
               <span>Motor de Inteligencia Artificial</span>
             </label>
             <select
               value={settings.aiEngine}
               onChange={(e) => onUpdateSettings({ aiEngine: e.target.value as Settings["aiEngine"] })}
-              className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
+              className="w-full bg-slate-100/60 dark:bg-slate-950/60 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
             >
               <option value="cloud">Cloud (Gemini 2.0 Flash) - Más rápido y preciso</option>
               <option value="local">Local (Whisper) - Privacidad total</option>
@@ -61,14 +61,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Chunk interval */}
           <div>
-            <label className="block text-slate-200 font-semibold mb-1 flex items-center gap-1.5">
-              <Clock size={14} className="text-cyan-400" />
+            <label className="block text-slate-700 dark:text-slate-200 font-semibold mb-1 flex items-center gap-1.5">
+              <Clock size={14} className="text-cyan-600 dark:text-cyan-400" />
               <span>Intervalo de Envío / Buffer</span>
             </label>
             <select
               value={settings.chunkDurationSec}
               onChange={(e) => onUpdateSettings({ chunkDurationSec: Number(e.target.value) })}
-              className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
+              className="w-full bg-slate-100/60 dark:bg-slate-950/60 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
             >
               <option value={2.5}>2.5 segundos (Súper rápido)</option>
               <option value={3}>3 segundos (Recomendado)</option>
@@ -78,8 +78,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-slate-200 font-semibold mb-1 flex items-center gap-1.5">
-              <Languages size={14} className="text-cyan-400" />
+            <label className="block text-slate-700 dark:text-slate-200 font-semibold mb-1 flex items-center gap-1.5">
+              <Languages size={14} className="text-cyan-600 dark:text-cyan-400" />
               <span>Idioma hablado</span>
             </label>
             <select
@@ -89,7 +89,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   inputLanguage: e.target.value as Settings["inputLanguage"],
                 })
               }
-              className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
+              className="w-full bg-slate-100/60 dark:bg-slate-950/60 border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
             >
               <option value="english">Inglés (Principal)</option>
               <option value="spanish">Español (Secundario)</option>
@@ -98,27 +98,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {/* Auto Translate Settings */}
-          <div className="p-3.5 bg-white/5 border border-white/10 rounded-xl space-y-3 backdrop-blur-md">
+          <div className="p-3.5 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl space-y-3 backdrop-blur-md">
             <div className="flex items-center justify-between">
-              <span className="text-slate-200 font-semibold flex items-center gap-1.5">
-                <Languages size={14} className="text-cyan-400" />
+              <span className="text-slate-700 dark:text-slate-200 font-semibold flex items-center gap-1.5">
+                <Languages size={14} className="text-cyan-600 dark:text-cyan-400" />
                 <span>Traducción en Tiempo Real</span>
               </span>
               <input
                 type="checkbox"
                 checked={settings.autoTranslate}
                 onChange={(e) => onUpdateSettings({ autoTranslate: e.target.checked })}
-                className="w-4 h-4 rounded bg-slate-900 border-white/20 text-cyan-500 focus:ring-cyan-400"
+                className="w-4 h-4 rounded bg-slate-200 dark:bg-slate-900 border-black/20 dark:border-white/20 text-cyan-500 focus:ring-cyan-400"
               />
             </div>
 
             {settings.autoTranslate && (
               <div>
-                <label className="block text-slate-400 text-[11px] mb-1">Idioma de Destino:</label>
+                <label className="block text-slate-500 dark:text-slate-400 text-[11px] mb-1">Idioma de Destino:</label>
                 <select
                   value={settings.targetLanguage}
                   onChange={(e) => onUpdateSettings({ targetLanguage: e.target.value })}
-                  className="w-full bg-slate-950/60 border border-white/10 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-slate-100/60 dark:bg-slate-950/60 border border-black/10 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-cyan-400"
                 >
                   <option value="Español">Español</option>
                   <option value="Inglés">Inglés</option>
@@ -135,8 +135,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Typography Size */}
           <div>
-            <label className="block text-slate-200 font-semibold mb-1 flex items-center gap-1.5">
-              <Type size={14} className="text-cyan-400" />
+            <label className="block text-slate-700 dark:text-slate-200 font-semibold mb-1 flex items-center gap-1.5">
+              <Type size={14} className="text-cyan-600 dark:text-cyan-400" />
               <span>Tamaño de Texto</span>
             </label>
             <div className="grid grid-cols-4 gap-2">
@@ -147,7 +147,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className={`py-1.5 rounded-xl border text-center font-bold capitalize transition backdrop-blur-md ${
                     settings.fontSize === size
                       ? "bg-cyan-500 border-cyan-400 text-slate-950 shadow-md"
-                      : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                      : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10"
                   }`}
                 >
                   {size === "sm" ? "Chico" : size === "md" ? "Normal" : size === "lg" ? "Grande" : "Extra"}
@@ -157,36 +157,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {/* Toggles */}
-          <div className="space-y-2 pt-2 border-t border-white/10">
+          <div className="space-y-2 pt-2 border-t border-black/10 dark:border-white/10">
             <div className="flex items-center justify-between">
-              <span className="text-slate-200 flex items-center gap-1.5">
-                <Clock size={14} className="text-slate-400" />
+              <span className="text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                <Clock size={14} className="text-slate-500 dark:text-slate-400" />
                 <span>Mostrar Marcas de Tiempo</span>
               </span>
               <input
                 type="checkbox"
                 checked={settings.showTimestamps}
                 onChange={(e) => onUpdateSettings({ showTimestamps: e.target.checked })}
-                className="w-4 h-4 rounded bg-slate-900 border-white/20 text-cyan-500"
+                className="w-4 h-4 rounded bg-slate-200 dark:bg-slate-900 border-black/20 dark:border-white/20 text-cyan-500"
               />
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-slate-200 flex items-center gap-1.5">
-                <Eye size={14} className="text-slate-400" />
+              <span className="text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                <Eye size={14} className="text-slate-500 dark:text-slate-400" />
                 <span>Desplazamiento Automático (Auto-Scroll)</span>
               </span>
               <input
                 type="checkbox"
                 checked={settings.autoScroll}
                 onChange={(e) => onUpdateSettings({ autoScroll: e.target.checked })}
-                className="w-4 h-4 rounded bg-slate-900 border-white/20 text-cyan-500"
+                className="w-4 h-4 rounded bg-slate-200 dark:bg-slate-900 border-black/20 dark:border-white/20 text-cyan-500"
               />
             </div>
           </div>
         </div>
 
-        <div className="mt-6 pt-3 border-t border-white/10 flex justify-end">
+        <div className="mt-6 pt-3 border-t border-black/10 dark:border-white/10 flex justify-end">
           <button
             onClick={onClose}
             className="px-5 py-2 text-xs font-bold text-slate-950 bg-cyan-500 hover:bg-cyan-400 rounded-xl transition shadow-md"

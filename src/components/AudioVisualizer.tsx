@@ -109,7 +109,7 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
   }, [stream, isRecording]);
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-xl">
+    <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-2xl p-4 shadow-2xl backdrop-blur-xl">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
           <div
@@ -119,14 +119,14 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
                 : "bg-slate-600"
             }`}
           />
-          <span className="text-sm font-bold text-white tracking-tight">
+          <span className="text-sm font-bold text-slate-900 dark:text-white tracking-tight">
             {isRecording
               ? sourceType === "tab"
                 ? "Audio de Pestaña en Vivo"
                 : "Micrófono Activo"
               : "Esperando inicio de captura"}
           </span>
-          <span className="text-xs px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10 font-mono">
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-black/10 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-black/10 dark:border-white/10 font-mono">
             {sourceType === "tab" ? "Pestaña Navegador" : sourceType === "mic" ? "Micrófono" : "Archivo"}
           </span>
         </div>
@@ -141,7 +141,7 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
           )}
 
           {isRecording && hasAudioTrack && (
-            <div className="flex items-center gap-2 text-cyan-400 bg-cyan-950/30 border border-cyan-400/30 px-2.5 py-1 rounded-lg backdrop-blur-md font-semibold">
+            <div className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400 bg-cyan-950/30 border border-cyan-400/30 px-2.5 py-1 rounded-lg backdrop-blur-md font-semibold">
               <Volume2 size={15} />
               <span>{audioLevel}% Nivel de entrada</span>
             </div>
@@ -150,7 +150,7 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
       </div>
 
       {/* Canvas Equalizer Display */}
-      <div className="relative h-14 bg-slate-950/80 rounded-xl border border-white/10 overflow-hidden flex items-center justify-center shadow-inner">
+      <div className="relative h-14 bg-slate-100/80 dark:bg-slate-950/80 rounded-xl border border-black/10 dark:border-white/10 overflow-hidden flex items-center justify-center shadow-inner">
         {isRecording && hasAudioTrack ? (
           <canvas
             ref={canvasRef}
@@ -159,8 +159,8 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="flex items-center gap-2 text-slate-400 text-xs font-sans">
-            <Radio size={16} className={isRecording ? "animate-spin text-cyan-400" : "text-slate-500"} />
+          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-sans">
+            <Radio size={16} className={isRecording ? "animate-spin text-cyan-600 dark:text-cyan-400" : "text-slate-500"} />
             <span>
               {isRecording
                 ? "Conectando con el flujo de audio..."
@@ -171,7 +171,7 @@ export const AudioVisualizer: React.FC<AudioVisualizerProps> = ({
 
         {/* Audio Volume DB Bar at bottom */}
         {isRecording && hasAudioTrack && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 overflow-hidden">
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/10 dark:bg-white/10 overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-indigo-500 via-cyan-400 to-fuchsia-400 transition-all duration-75"
               style={{ width: `${audioLevel}%` }}

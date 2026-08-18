@@ -124,24 +124,24 @@ export function CourseView() {
     await fetchCourseData();
   };
 
-  if (loading) return <div className="min-h-screen bg-[#020617] text-slate-400 p-6">Cargando...</div>;
+  if (loading) return <div className="min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-500 dark:text-slate-400 p-6">Cargando...</div>;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 p-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-800 dark:text-slate-100 p-6">
       <div className="max-w-4xl mx-auto">
-        <button onClick={() => navigate('/')} className="flex items-center space-x-2 text-slate-400 hover:text-white mb-6">
+        <button onClick={() => navigate('/')} className="flex items-center space-x-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white mb-6">
           <ArrowLeft className="w-5 h-5" />
           <span>Volver a mis cursos</span>
         </button>
 
-        <header className="bg-slate-900 border border-slate-800 rounded-2xl p-8 mb-8">
+        <header className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 mb-8">
           <h1 className="text-3xl font-bold mb-2">{course?.name}</h1>
-          <p className="text-slate-400">Código: {course?.code} | Créditos: {course?.credits}</p>
+          <p className="text-slate-500 dark:text-slate-400">Código: {course?.code} | Créditos: {course?.credits}</p>
         </header>
 
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Actividades</h2>
-          <button onClick={openNewTaskModal} className="bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-4 rounded-lg flex items-center space-x-2 transition-colors">
+          <button onClick={openNewTaskModal} className="bg-cyan-600 hover:bg-cyan-500 text-slate-900 dark:text-white font-medium py-2 px-4 rounded-lg flex items-center space-x-2 transition-colors">
             <Plus className="w-5 h-5" />
             <span>Nueva Actividad</span>
           </button>
@@ -149,9 +149,9 @@ export function CourseView() {
 
         <div className="space-y-4">
           {tasks.map(task => (
-            <div key={task.taskId} className="bg-slate-900 border border-slate-800 rounded-xl p-6 flex items-center justify-between group">
+            <div key={task.taskId} className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex items-center justify-between group">
               <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-xl ${task.status === 'completed' ? 'bg-green-500/10 text-green-400' : 'bg-slate-800 text-slate-400'}`}>
+                <div className={`p-3 rounded-xl ${task.status === 'completed' ? 'bg-green-500/10 text-green-400' : 'bg-slate-300 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
                   <FileText className="w-6 h-6" />
                 </div>
                 <div>
@@ -170,7 +170,7 @@ export function CourseView() {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => navigate(`/course/${courseId}/task/${task.taskId}`)}
-                  className="bg-slate-800 hover:bg-slate-700 text-white py-2 px-4 rounded-lg transition-colors"
+                  className="bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white py-2 px-4 rounded-lg transition-colors"
                 >
                   Abrir
                 </button>
@@ -187,42 +187,42 @@ export function CourseView() {
           ))}
 
           {tasks.length === 0 && (
-            <div className="text-center py-12 border-2 border-dashed border-slate-800 rounded-xl">
-              <p className="text-slate-400">No hay actividades registradas en este curso.</p>
+            <div className="text-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl">
+              <p className="text-slate-500 dark:text-slate-400">No hay actividades registradas en este curso.</p>
             </div>
           )}
         </div>
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl">
+        <div className="fixed inset-0 bg-white/60 dark:bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">{editingTask ? 'Editar Actividad' : 'Nueva Actividad'}</h2>
-              <button onClick={closeModal} className="text-slate-400 hover:text-white">
+              <button onClick={closeModal} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white">
                 <X className="w-6 h-6" />
               </button>
             </div>
             
             <form onSubmit={handleSaveTask} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Nombre de la Actividad</label>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Nombre de la Actividad</label>
                 <input
                   required
                   type="text"
                   value={modalTitle}
                   onChange={(e) => setModalTitle(e.target.value)}
                   placeholder="ej. Fase 1 - Reconocimiento"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Tipo de Actividad</label>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Tipo de Actividad</label>
                 <select
                   value={modalType}
                   onChange={(e) => setModalType(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
                 >
                   <option value="individual">Individual</option>
                   <option value="collaborative">Colaborativa</option>
@@ -230,13 +230,13 @@ export function CourseView() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Nombre del Tutor</label>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Nombre del Tutor</label>
                 <input
                   type="text"
                   value={modalTutor}
                   onChange={(e) => setModalTutor(e.target.value)}
                   placeholder="ej. Juan Pérez"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -244,13 +244,13 @@ export function CourseView() {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                  className="bg-cyan-600 hover:bg-cyan-500 text-slate-900 dark:text-white font-medium py-2 px-4 rounded-lg transition-colors"
                 >
                   {editingTask ? 'Guardar Cambios' : 'Crear Actividad'}
                 </button>
@@ -261,13 +261,13 @@ export function CourseView() {
       )}
 
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-xl">
+        <div className="fixed inset-0 bg-white/60 dark:bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-sm shadow-xl">
             <h2 className="text-xl font-bold mb-4">Eliminar Actividad</h2>
-            <p className="text-slate-400 mb-6">¿Seguro que deseas eliminar esta actividad?</p>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">¿Seguro que deseas eliminar esta actividad?</p>
             <div className="flex justify-end space-x-3">
-              <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-slate-400 hover:text-white transition-colors">Cancelar</button>
-              <button onClick={deleteTask} className="bg-red-600 hover:bg-red-500 text-white font-medium py-2 px-4 rounded-lg transition-colors">Eliminar</button>
+              <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white transition-colors">Cancelar</button>
+              <button onClick={deleteTask} className="bg-red-600 hover:bg-red-500 text-slate-900 dark:text-white font-medium py-2 px-4 rounded-lg transition-colors">Eliminar</button>
             </div>
           </div>
         </div>

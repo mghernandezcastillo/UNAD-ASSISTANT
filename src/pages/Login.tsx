@@ -23,18 +23,18 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-800">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-slate-200 dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-800">
         <div className="flex justify-center mb-8">
           <div className="p-4 bg-cyan-500/10 rounded-full">
-            <GraduationCap className="w-12 h-12 text-cyan-400" />
+            <GraduationCap className="w-12 h-12 text-cyan-600 dark:text-cyan-400" />
           </div>
         </div>
         
-        <h1 className="text-3xl font-bold text-center text-slate-100 mb-2">
+        <h1 className="text-3xl font-bold text-center text-slate-800 dark:text-slate-100 mb-2">
           Asistente UNAD
         </h1>
-        <p className="text-slate-400 text-center mb-8">
+        <p className="text-slate-500 dark:text-slate-400 text-center mb-8">
           Inicia sesión con tu cuenta de Google (preferiblemente la de la UNAD o una personal) para sincronizar tus trabajos y acceder a Google Docs y Drive.
         </p>
 

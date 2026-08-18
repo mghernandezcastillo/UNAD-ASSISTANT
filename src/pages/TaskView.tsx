@@ -368,24 +368,24 @@ export function TaskView() {
     }
   };
 
-  if (loading || !task) return <div className="min-h-screen bg-[#020617] text-slate-400 p-6">Cargando...</div>;
+  if (loading || !task) return <div className="min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-500 dark:text-slate-400 p-6">Cargando...</div>;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-800 dark:text-slate-100 flex flex-col md:flex-row">
       {/* Sidebar */}
-      <div className="w-full md:w-1/3 border-r border-slate-800 p-6 overflow-y-auto max-h-screen bg-slate-900/50">
-        <button onClick={() => navigate(`/course/${courseId}`)} className="flex items-center space-x-2 text-slate-400 hover:text-white mb-6">
+      <div className="w-full md:w-1/3 border-r border-slate-200 dark:border-slate-800 p-6 overflow-y-auto max-h-screen bg-slate-900/50">
+        <button onClick={() => navigate(`/course/${courseId}`)} className="flex items-center space-x-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white mb-6">
           <ArrowLeft className="w-5 h-5" />
           <span>Volver al curso</span>
         </button>
 
         <h1 className="text-2xl font-bold mb-1">{task.title}</h1>
-        <p className="text-cyan-400 text-sm mb-6">{task.type === 'individual' ? 'Individual' : 'Colaborativa'}</p>
+        <p className="text-cyan-600 dark:text-cyan-400 text-sm mb-6">{task.type === 'individual' ? 'Individual' : 'Colaborativa'}</p>
 
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
             <h3 className="font-semibold mb-3">1. Guía de Actividades y Rúbrica</h3>
-            <label className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
+            <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
               <Upload className="w-4 h-4" />
               <span className="text-sm truncate max-w-[200px]">{guideFile ? guideFile.name : 'Subir archivo (PDF/Doc/Img)'}</span>
               <input type="file" onChange={handleGuideUpload} className="hidden" />
@@ -399,16 +399,16 @@ export function TaskView() {
             )}
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
             <h3 className="font-semibold mb-3">2. Archivos adicionales (Opcional)</h3>
-            <label className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
+            <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
               <Upload className="w-4 h-4" />
               <span className="text-sm">Subir archivos</span>
               <input type="file" multiple onChange={handleAdditionalFiles} className="hidden" />
             </label>
             {additionalFiles.length > 0 && (
               <div className="flex items-center justify-between mt-2">
-                <p className="text-xs text-slate-400">{additionalFiles.length} archivos guardados en memoria</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{additionalFiles.length} archivos guardados en memoria</p>
                 <button onClick={clearAdditionalFiles} className="text-xs text-red-400 hover:text-red-300">
                   Limpiar anexos
                 </button>
@@ -416,28 +416,28 @@ export function TaskView() {
             )}
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
             <h3 className="font-semibold mb-3">3. Referentes y Foro (Opcional)</h3>
             <textarea
               value={bibliography}
               onChange={e => setBibliography(e.target.value)}
               onBlur={saveContextToDb}
               placeholder="Pega aquí los contenidos o referentes bibliográficos..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 mb-3 h-20 resize-none"
+              className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 mb-3 h-20 resize-none"
             />
             <textarea
               value={forumContext}
               onChange={e => setForumContext(e.target.value)}
               onBlur={saveContextToDb}
               placeholder="Pega aquí aportes de compañeros en el foro..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
+              className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
             />
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
             <h3 className="font-semibold mb-3">4. Avance del Grupo (Auditoría)</h3>
-            <p className="text-xs text-slate-400 mb-3">Sube el documento de tus compañeros para saber qué falta y generar tu aporte sin dañar el de ellos.</p>
-            <label className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors mb-3">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Sube el documento de tus compañeros para saber qué falta y generar tu aporte sin dañar el de ellos.</p>
+            <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors mb-3">
               <Upload className="w-4 h-4" />
               <span className="text-sm truncate max-w-[200px]">{groupDraftFile ? groupDraftFile.name : 'Subir avance (.docx/pdf/img)'}</span>
               <input type="file" onChange={handleGroupDraftUpload} className="hidden" />
@@ -454,14 +454,14 @@ export function TaskView() {
               onChange={e => setGroupDraftText(e.target.value)}
               onBlur={saveContextToDb}
               placeholder="O pega aquí el texto del avance de tus compañeros..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
+              className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
             />
           </div>
 
           <button
             onClick={generateTaskAssistance}
             disabled={isProcessing || !guideFile}
-            className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-800 disabled:text-slate-500 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-cyan-900/20"
+            className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-slate-900 dark:text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-cyan-900/20"
           >
             <Sparkles className="w-5 h-5" />
             <span>{isProcessing ? 'Procesando...' : 'Generar Asistencia'}</span>
@@ -473,24 +473,24 @@ export function TaskView() {
                 <Check className="w-4 h-4" />
                 <span>Documento Creado</span>
               </h3>
-              <a href={task.docUrl} target="_blank" rel="noreferrer" className="text-sm text-cyan-400 hover:underline break-all">
+              <a href={task.docUrl} target="_blank" rel="noreferrer" className="text-sm text-cyan-600 dark:text-cyan-400 hover:underline break-all">
                 Abrir en Google Docs
               </a>
             </div>
           )}
 
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
              <h3 className="font-semibold mb-3">Herramientas</h3>
-             <button onClick={toggleScreenShare} className={`w-full py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors ${screenStream ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-slate-800 hover:bg-slate-700 text-slate-200'}`}>
+             <button onClick={toggleScreenShare} className={`w-full py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors ${screenStream ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'}`}>
                 <Monitor className="w-4 h-4" />
                 <span>{screenStream ? 'Detener Compartir' : 'Compartir Pantalla (Exámenes/Foro)'}</span>
              </button>
              {screenStream && (
                 <>
-                <div className="mt-3 rounded-lg overflow-hidden border border-slate-700">
+                <div className="mt-3 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700">
                   <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-video object-cover bg-black" />
                 </div>
-                <button onClick={captureAndAnalyze} className="w-full mt-3 py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-semibold flex items-center justify-center space-x-2">
+                <button onClick={captureAndAnalyze} className="w-full mt-3 py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-900 dark:text-white font-semibold flex items-center justify-center space-x-2">
                   <Sparkles className="w-4 h-4" />
                   <span>Analizar Captura</span>
                 </button>
@@ -501,13 +501,13 @@ export function TaskView() {
       </div>
 
       {/* Main Content Area */}
-      <div className="w-full md:w-2/3 flex flex-col h-screen bg-[#020617]">
+      <div className="w-full md:w-2/3 flex flex-col h-screen bg-slate-50 dark:bg-[#020617]">
         <div className="flex-1 p-6 overflow-y-auto">
           {chatHistory.length > 0 ? (
             <div className="space-y-6 mb-4">
               {chatHistory.map((msg, idx) => (
-                <div key={idx} className={`p-6 rounded-xl ${msg.role === 'assistant' ? 'bg-slate-900 border border-slate-800' : 'bg-cyan-900/20 border border-cyan-900/30 ml-12'}`}>
-                  {msg.role === 'user' && <div className="font-semibold text-cyan-400 mb-2">Tú</div>}
+                <div key={idx} className={`p-6 rounded-xl ${msg.role === 'assistant' ? 'bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800' : 'bg-cyan-900/20 border border-cyan-900/30 ml-12'}`}>
+                  {msg.role === 'user' && <div className="font-semibold text-cyan-600 dark:text-cyan-400 mb-2">Tú</div>}
                   {msg.role === 'assistant' && <div className="font-semibold text-amber-400 mb-2 flex items-center space-x-2"><Sparkles className="w-4 h-4"/><span>Asistente IA</span></div>}
                   <div className="prose prose-invert prose-cyan max-w-none">
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -525,7 +525,7 @@ export function TaskView() {
         </div>
         
         {/* Chat Input */}
-        <div className="p-4 bg-slate-900 border-t border-slate-800">
+        <div className="p-4 bg-slate-200 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
           <div className="flex space-x-2">
             <input 
               type="text" 
@@ -533,12 +533,12 @@ export function TaskView() {
               onChange={e => setChatMessage(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
               placeholder="Ej: El profesor me pidió corregir el punto 2..." 
-              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500"
+              className="flex-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
             />
             <button 
               onClick={sendChatMessage}
               disabled={!chatMessage.trim()}
-              className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-800 disabled:text-slate-500 text-white p-3 rounded-xl transition-colors flex items-center justify-center"
+              className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-slate-900 dark:text-white p-3 rounded-xl transition-colors flex items-center justify-center"
             >
               <Send className="w-5 h-5" />
             </button>

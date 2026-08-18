@@ -139,27 +139,27 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-[#020617]/95 backdrop-blur-2xl border border-white/10 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-100/80 dark:bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="bg-[#020617]/95 backdrop-blur-2xl border border-black/10 dark:border-white/10 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
         {/* Glow accent */}
         <div className="absolute -top-16 -right-16 w-56 h-56 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+        <div className="flex items-center justify-between pb-3 border-b border-black/10 dark:border-white/10 mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 to-indigo-500 p-0.5 shadow-lg shadow-cyan-500/20">
-              <div className="w-full h-full bg-[#020617] rounded-[10px] flex items-center justify-center text-cyan-400">
+              <div className="w-full h-full bg-slate-50 dark:bg-[#020617] rounded-[10px] flex items-center justify-center text-cyan-600 dark:text-cyan-400">
                 <Zap size={20} />
               </div>
             </div>
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 Asistente Rápido de Pantalla / Exámenes
-                <span className="text-[10px] bg-cyan-400/10 text-cyan-300 border border-cyan-400/30 px-2 py-0.5 rounded-full font-mono">
+                <span className="text-[10px] bg-cyan-400/10 text-cyan-700 dark:text-cyan-300 border border-cyan-400/30 px-2 py-0.5 rounded-full font-mono">
                   Bajo Consumo de Tokens
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Captura instantánea de la pestaña en vivo con consulta Gemini optimizada
               </p>
             </div>
@@ -167,7 +167,7 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-xl hover:bg-white/10 transition"
+            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white p-1 rounded-xl hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 transition"
           >
             <X size={20} />
           </button>
@@ -178,28 +178,28 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
           <button
             onClick={() => handleTakeSnapshotAndQuery("fast_answer")}
             disabled={loading}
-            className="p-3 bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 hover:from-cyan-500/30 hover:to-indigo-500/30 border border-cyan-400/40 rounded-xl flex items-center gap-2.5 text-left text-slate-100 transition group backdrop-blur-md"
+            className="p-3 bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 hover:from-cyan-500/30 hover:to-indigo-500/30 border border-cyan-400/40 rounded-xl flex items-center gap-2.5 text-left text-slate-800 dark:text-slate-100 transition group backdrop-blur-md"
           >
             <div className="p-2 rounded-lg bg-cyan-400 text-slate-950 font-bold group-hover:scale-105 transition-transform">
               <FileQuestion size={16} />
             </div>
             <div>
-              <div className="text-xs font-bold text-cyan-300">⚡ Resolver Pregunta</div>
-              <div className="text-[10px] text-slate-400">Respuesta directa de examen</div>
+              <div className="text-xs font-bold text-cyan-700 dark:text-cyan-300">⚡ Resolver Pregunta</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Respuesta directa de examen</div>
             </div>
           </button>
 
           <button
             onClick={() => handleTakeSnapshotAndQuery("explain")}
             disabled={loading}
-            className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/30 rounded-xl flex items-center gap-2.5 text-left text-slate-100 transition group backdrop-blur-md"
+            className="p-3 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/10 hover:border-cyan-400/30 rounded-xl flex items-center gap-2.5 text-left text-slate-800 dark:text-slate-100 transition group backdrop-blur-md"
           >
             <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 group-hover:scale-105 transition-transform">
               <Lightbulb size={16} />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-200">💡 Explicar Pantalla</div>
-              <div className="text-[10px] text-slate-400">Resumen y concepto clave</div>
+              <div className="text-xs font-bold text-slate-700 dark:text-slate-200">💡 Explicar Pantalla</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Resumen y concepto clave</div>
             </div>
           </button>
 
@@ -209,14 +209,14 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
               if (img) setSnapshotUrl(img);
             }}
             disabled={loading}
-            className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl flex items-center gap-2.5 text-left text-slate-100 transition group backdrop-blur-md"
+            className="p-3 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/10 hover:border-black/20 dark:border-white/20 rounded-xl flex items-center gap-2.5 text-left text-slate-800 dark:text-slate-100 transition group backdrop-blur-md"
           >
-            <div className="p-2 rounded-lg bg-slate-800 text-slate-300 group-hover:scale-105 transition-transform">
+            <div className="p-2 rounded-lg bg-slate-300 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:scale-105 transition-transform">
               <Camera size={16} />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-200">📸 Nueva Captura</div>
-              <div className="text-[10px] text-slate-400">Refrescar fotograma en vivo</div>
+              <div className="text-xs font-bold text-slate-700 dark:text-slate-200">📸 Nueva Captura</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">Refrescar fotograma en vivo</div>
             </div>
           </button>
         </div>
@@ -224,7 +224,7 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
         {/* Content Body: Image Thumbnail & Answer Output */}
         <div className="flex-1 overflow-y-auto space-y-4 pr-1">
           {/* Screenshot Preview */}
-          <div className="relative bg-slate-950/80 rounded-xl border border-white/10 overflow-hidden min-h-[140px] max-h-[220px] flex items-center justify-center">
+          <div className="relative bg-slate-100/80 dark:bg-slate-950/80 rounded-xl border border-black/10 dark:border-white/10 overflow-hidden min-h-[140px] max-h-[220px] flex items-center justify-center">
             {snapshotUrl ? (
               <img
                 src={snapshotUrl}
@@ -232,13 +232,13 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
                 className="w-full h-full object-contain max-h-[200px]"
               />
             ) : (
-              <div className="p-6 text-center text-slate-400 text-xs flex flex-col items-center gap-2">
+              <div className="p-6 text-center text-slate-500 dark:text-slate-400 text-xs flex flex-col items-center gap-2">
                 <Eye size={24} className="text-slate-500" />
                 <span>Transmitiendo pestaña... Haz clic en "Resolver Pregunta" para capturar el cuadro actual.</span>
               </div>
             )}
             {snapshotUrl && (
-              <div className="absolute top-2 right-2 bg-slate-950/80 backdrop-blur-md border border-white/10 text-[10px] font-mono text-cyan-300 px-2 py-0.5 rounded-md">
+              <div className="absolute top-2 right-2 bg-slate-100/80 dark:bg-slate-950/80 backdrop-blur-md border border-black/10 dark:border-white/10 text-[10px] font-mono text-cyan-700 dark:text-cyan-300 px-2 py-0.5 rounded-md">
                 JPEG Compreso (~800px) • Ultra-Ligero
               </div>
             )}
@@ -256,7 +256,7 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
                   handleTakeSnapshotAndQuery("custom", customPrompt);
                 }
               }}
-              className="flex-1 bg-slate-950/60 border border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
+              className="flex-1 bg-slate-100/60 dark:bg-slate-950/60 border border-black/10 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 backdrop-blur-md"
             />
             <button
               onClick={() => handleTakeSnapshotAndQuery("custom", customPrompt)}
@@ -269,16 +269,16 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
           </div>
 
           {/* AI Response Output */}
-          <div className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-md min-h-[120px] relative">
+          <div className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-xl p-4 backdrop-blur-md min-h-[120px] relative">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-cyan-700 dark:text-cyan-300 flex items-center gap-1.5">
                 <Sparkles size={14} />
                 <span>Respuesta Rápida de Gemini:</span>
               </span>
               {answer && (
                 <button
                   onClick={handleCopy}
-                  className="px-2 py-1 bg-white/10 hover:bg-white/20 text-slate-200 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition"
+                  className="px-2 py-1 bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 text-slate-700 dark:text-slate-200 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition"
                 >
                   {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
                   <span>{copied ? "Copiado" : "Copiar"}</span>
@@ -287,16 +287,16 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
             </div>
 
             {loading ? (
-              <div className="py-6 flex flex-col items-center justify-center gap-2 text-xs text-cyan-300 font-medium">
-                <Loader2 size={22} className="animate-spin text-cyan-400" />
+              <div className="py-6 flex flex-col items-center justify-center gap-2 text-xs text-cyan-700 dark:text-cyan-300 font-medium">
+                <Loader2 size={22} className="animate-spin text-cyan-600 dark:text-cyan-400" />
                 <span>Analizando captura de pantalla en tiempo récord...</span>
               </div>
             ) : answer ? (
-              <div className="text-xs sm:text-sm text-slate-100 leading-relaxed font-sans whitespace-pre-wrap selection:bg-cyan-500 selection:text-slate-950">
+              <div className="text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-relaxed font-sans whitespace-pre-wrap selection:bg-cyan-500 selection:text-slate-950">
                 {answer}
               </div>
             ) : (
-              <p className="text-xs text-slate-400 italic py-2">
+              <p className="text-xs text-slate-500 dark:text-slate-400 italic py-2">
                 Haz clic en <strong>Resolver Pregunta</strong> o realiza una consulta personalizada sobre la transmisión en vivo para ver la respuesta aquí.
               </p>
             )}
@@ -304,14 +304,14 @@ export const FastScreenHelperModal: React.FC<FastScreenHelperModalProps> = ({
         </div>
 
         {/* Footer info */}
-        <div className="pt-3 mt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+        <div className="pt-3 mt-3 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
           <span className="flex items-center gap-1">
-            <HelpCircle size={13} className="text-cyan-400" />
+            <HelpCircle size={13} className="text-cyan-600 dark:text-cyan-400" />
             Tip: Maximiza la ventana compartida para mayor nitidez.
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 text-xs font-bold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition"
+            className="px-4 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded-xl transition"
           >
             Cerrar
           </button>

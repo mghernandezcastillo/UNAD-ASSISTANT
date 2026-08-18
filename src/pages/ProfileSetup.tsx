@@ -241,9 +241,9 @@ export function ProfileSetup() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] p-4 flex items-center justify-center">
-      <div className="max-w-2xl w-full bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-800">
-        <h1 className="text-2xl font-bold text-slate-100 mb-6">Completa tu perfil UNAD</h1>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] p-4 flex items-center justify-center">
+      <div className="max-w-2xl w-full bg-slate-200 dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-800">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Completa tu perfil UNAD</h1>
         
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6 text-red-400 text-sm">
@@ -254,66 +254,66 @@ export function ProfileSetup() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Nombre Completo</label>
-              <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Nombre Completo</label>
+              <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Documento de Identidad</label>
-              <input required type="text" name="idDocument" value={formData.idDocument} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Documento de Identidad</label>
+              <input required type="text" name="idDocument" value={formData.idDocument} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Edad</label>
-              <input required type="number" name="age" value={formData.age} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Edad</label>
+              <input required type="number" name="age" value={formData.age} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Programa (ej. Administración, Ingeniería)</label>
-              <input required type="text" name="program" value={formData.program} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Programa (ej. Administración, Ingeniería)</label>
+              <input required type="text" name="program" value={formData.program} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">País</label>
-              <input required type="text" name="country" value={formData.country} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">País</label>
+              <input required type="text" name="country" value={formData.country} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Ciudad</label>
-              <input required type="text" name="city" value={formData.city} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Ciudad</label>
+              <input required type="text" name="city" value={formData.city} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">CEAD</label>
-              <input required type="text" name="cead" value={formData.cead} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">CEAD</label>
+              <input required type="text" name="cead" value={formData.cead} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Escuela</label>
-              <input required type="text" name="school" value={formData.school} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Escuela</label>
+              <input required type="text" name="school" value={formData.school} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Zona</label>
-              <input required type="text" name="zone" value={formData.zone} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Zona</label>
+              <input required type="text" name="zone" value={formData.zone} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-400 mb-1">Centro</label>
-              <input required type="text" name="center" value={formData.center} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-500" />
+              <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Centro</label>
+              <input required type="text" name="center" value={formData.center} onChange={handleChange} className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500" />
             </div>
           </div>
 
                     <div className="pt-6 pb-2">
-            <h2 className="text-lg font-semibold text-slate-100 mb-4">Plantillas Base Globales</h2>
-            <p className="text-sm text-slate-400 mb-4">Estas plantillas se usarán por defecto para generar tus trabajos en todos los cursos.</p>
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Plantillas Base Globales</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Estas plantillas se usarán por defecto para generar tus trabajos en todos los cursos.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-slate-950 border border-slate-800 rounded-xl p-4">
+              <div className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
                 <h3 className="font-semibold text-sm mb-2">Plantilla Trabajo Individual</h3>
-                <label className={`w-full flex items-center justify-center space-x-2 py-2 px-4 rounded-lg cursor-pointer transition-colors border ${individualTemplateName ? 'bg-cyan-900/30 border-cyan-800 hover:bg-cyan-900/50' : 'bg-slate-900 hover:bg-slate-800 border-slate-700'}`}>
-                  {individualTemplateName ? <CheckCircle2 className="w-4 h-4 text-cyan-400" /> : <Upload className="w-4 h-4" />}
-                  <span className={`text-sm truncate max-w-[200px] ${individualTemplateName ? 'text-cyan-400' : ''}`}>
+                <label className={`w-full flex items-center justify-center space-x-2 py-2 px-4 rounded-lg cursor-pointer transition-colors border ${individualTemplateName ? 'bg-cyan-900/30 border-cyan-800 hover:bg-cyan-900/50' : 'bg-slate-200 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-300 dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}>
+                  {individualTemplateName ? <CheckCircle2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" /> : <Upload className="w-4 h-4" />}
+                  <span className={`text-sm truncate max-w-[200px] ${individualTemplateName ? 'text-cyan-600 dark:text-cyan-400' : ''}`}>
                     {individualTemplateName ? `Subido: ${individualTemplateName}` : 'Subir plantilla (.docx, .pdf)'}
                   </span>
                   <input type="file" onChange={(e) => handleFile(e, 'individual')} className="hidden" accept=".pdf,.doc,.docx" />
                 </label>
               </div>
-              <div className="bg-slate-950 border border-slate-800 rounded-xl p-4">
+              <div className="bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
                 <h3 className="font-semibold text-sm mb-2">Plantilla Trabajo Colaborativo</h3>
-                <label className={`w-full flex items-center justify-center space-x-2 py-2 px-4 rounded-lg cursor-pointer transition-colors border ${collaborativeTemplateName ? 'bg-cyan-900/30 border-cyan-800 hover:bg-cyan-900/50' : 'bg-slate-900 hover:bg-slate-800 border-slate-700'}`}>
-                  {collaborativeTemplateName ? <CheckCircle2 className="w-4 h-4 text-cyan-400" /> : <Upload className="w-4 h-4" />}
-                  <span className={`text-sm truncate max-w-[200px] ${collaborativeTemplateName ? 'text-cyan-400' : ''}`}>
+                <label className={`w-full flex items-center justify-center space-x-2 py-2 px-4 rounded-lg cursor-pointer transition-colors border ${collaborativeTemplateName ? 'bg-cyan-900/30 border-cyan-800 hover:bg-cyan-900/50' : 'bg-slate-200 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-300 dark:bg-slate-800 border-slate-300 dark:border-slate-700'}`}>
+                  {collaborativeTemplateName ? <CheckCircle2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" /> : <Upload className="w-4 h-4" />}
+                  <span className={`text-sm truncate max-w-[200px] ${collaborativeTemplateName ? 'text-cyan-600 dark:text-cyan-400' : ''}`}>
                     {collaborativeTemplateName ? `Subido: ${collaborativeTemplateName}` : 'Subir plantilla (.docx, .pdf)'}
                   </span>
                   <input type="file" onChange={(e) => handleFile(e, 'collaborative')} className="hidden" accept=".pdf,.doc,.docx" />
@@ -325,7 +325,7 @@ export function ProfileSetup() {
               <button 
                 type="button"
                 onClick={() => setIsTestModalOpen(true)}
-                className="flex items-center space-x-2 text-cyan-400 hover:text-cyan-300 text-sm font-medium bg-cyan-950/30 px-4 py-2 rounded-full border border-cyan-900/50 transition-colors"
+                className="flex items-center space-x-2 text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:text-cyan-300 text-sm font-medium bg-cyan-950/30 px-4 py-2 rounded-full border border-cyan-900/50 transition-colors"
               >
                 <FileText className="w-4 h-4" />
                 <span>Probar generación de documento en Docs</span>
@@ -333,11 +333,11 @@ export function ProfileSetup() {
             </div>
           </div>
 
-<div className="pt-4 border-t border-slate-800">
+<div className="pt-4 border-t border-slate-200 dark:border-slate-800">
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50"
+              className="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-900 dark:text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50"
             >
               {loading ? 'Guardando...' : 'Guardar y Continuar'}
             </button>
@@ -346,17 +346,17 @@ export function ProfileSetup() {
       </div>
 
       {isTestModalOpen && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl relative">
-            <button onClick={() => { setIsTestModalOpen(false); setTestDocUrl(''); }} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <div className="fixed inset-0 bg-white/60 dark:bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-xl relative">
+            <button onClick={() => { setIsTestModalOpen(false); setTestDocUrl(''); }} className="absolute top-4 right-4 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-900 dark:text-white">
               <X className="w-6 h-6" />
             </button>
             <div className="mb-6 flex flex-col items-center text-center mt-4">
               <div className="w-16 h-16 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mb-4">
                 <FileText className="w-8 h-8" />
               </div>
-              <h2 className="text-xl font-bold text-slate-100 mb-2">Prueba de Integración Docs</h2>
-              <p className="text-sm text-slate-400 mb-4">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Prueba de Integración Docs</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
                 Aquí validaremos que tu cuenta de Google esté conectada correctamente y probaremos cómo la IA generará un documento en tu Google Drive usando la estructura de tus plantillas (con texto de prueba y Lorem Ipsum).
               </p>
             </div>
@@ -365,7 +365,7 @@ export function ProfileSetup() {
               <button 
                 onClick={() => testGoogleLogin()}
                 disabled={isTestingDocs}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center space-x-2"
               >
                 {isTestingDocs ? (
                   <span>Generando documento...</span>
@@ -386,7 +386,7 @@ export function ProfileSetup() {
                   href={testDocUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium py-3 px-4 rounded-xl transition-colors flex items-center justify-center space-x-2"
                 >
                   <ExternalLink className="w-5 h-5" />
                   <span>Abrir Documento Creado</span>
