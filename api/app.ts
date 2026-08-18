@@ -743,8 +743,6 @@ app.post("/api/extract-tutor", async (req, res) => {
   }
 });
 
-export default app;
-
 app.post("/api/task-chat", async (req, res) => {
   try {
     const { task, course, profile, history, forumContext, image, guideBase64, additionalFilesBase64 } = req.body || {};
@@ -821,3 +819,6 @@ Responde de forma útil, directa, y ayúdale a corregir, redactar, o mejorar lo 
     return res.status(500).json({ answer: "Error al comunicarse con el asistente." });
   }
 });
+
+export default app;
+
