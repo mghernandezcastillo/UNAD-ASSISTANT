@@ -30,7 +30,8 @@ export function ProfileSetup() {
     cead: profile?.cead || 'José Acevedo y Gomez',
     school: profile?.school || 'ECISA - Escuela de Ciencias de la Salud',
     zone: profile?.zone || 'ZONA CENTRO BOGOTÁ CUNDINAMARCA',
-    center: profile?.center || 'José Acevedo y Gomez'
+    center: profile?.center || 'José Acevedo y Gomez',
+    visualGenerationMode: profile?.visualGenerationMode || 'image_first'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -232,6 +233,7 @@ export function ProfileSetup() {
         school: formData.school,
         zone: formData.zone,
         center: formData.center,
+        visualGenerationMode: formData.visualGenerationMode,
         updatedAt: Date.now(),
       };
       
@@ -304,7 +306,34 @@ export function ProfileSetup() {
             </div>
           </div>
 
-                    <div className="pt-6 pb-2">
+                    <div className="pt-6 pb-2 border-t border-slate-200 dark:border-slate-800 mt-6">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Preferencias de Generación Visual</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Elige cómo quieres que la IA maneje elementos visuales como presentaciones (diapositivas) y mapas conceptuales.</p>
+            
+            <div className="space-y-3">
+              <label className={`flex p-4 border rounded-xl cursor-pointer transition-colors ${formData.visualGenerationMode === 'image_first' ? 'bg-cyan-50 dark:bg-cyan-900/20 border-cyan-500' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                <div className="flex items-center h-5">
+                  <input type="radio" name="visualGenerationMode" value="image_first" checked={formData.visualGenerationMode === 'image_first'} onChange={handleChange} className="w-4 h-4 text-cyan-600 border-slate-300 focus:ring-cyan-500" />
+                </div>
+                <div className="ml-3 text-sm">
+                  <span className="font-semibold text-slate-900 dark:text-slate-100 block">Modo Todo en Uno (Predeterminado)</span>
+                  <span className="text-slate-500 dark:text-slate-400">La IA genera una imagen horizontal (16:9) completa con el diseño, los textos, títulos y tu nombre integrado. Lista para copiar y pegar directamente en la diapositiva o documento.</span>
+                </div>
+              </label>
+
+              <label className={`flex p-4 border rounded-xl cursor-pointer transition-colors ${formData.visualGenerationMode === 'structured' ? 'bg-cyan-50 dark:bg-cyan-900/20 border-cyan-500' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                <div className="flex items-center h-5">
+                  <input type="radio" name="visualGenerationMode" value="structured" checked={formData.visualGenerationMode === 'structured'} onChange={handleChange} className="w-4 h-4 text-cyan-600 border-slate-300 focus:ring-cyan-500" />
+                </div>
+                <div className="ml-3 text-sm">
+                  <span className="font-semibold text-slate-900 dark:text-slate-100 block">Modo Estructurado (Recomendado)</span>
+                  <span className="text-slate-500 dark:text-slate-400">La IA escribe el texto perfecto y editable directamente en el documento, y dibuja los mapas mediante diagramas exactos. Las imágenes solo se usan como fondos o decoración sin texto.</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div className="pt-6 pb-2 border-t border-slate-200 dark:border-slate-800 mt-6">
             <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Plantillas Base Globales</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Estas plantillas se usarán por defecto para generar tus trabajos en todos los cursos.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
