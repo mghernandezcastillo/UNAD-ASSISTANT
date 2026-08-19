@@ -19,6 +19,7 @@ export function TaskView() {
   // UI State
   const [isProcessing, setIsProcessing] = useState(false);
   const [guideFile, setGuideFile] = useState<File | null>(null);
+  const [rubricFile, setRubricFile] = useState<File | null>(null);
   const [additionalFiles, setAdditionalFiles] = useState<File[]>([]);
   const [bibliography, setBibliography] = useState<string>('');
   const [forumContext, setForumContext] = useState<string>('');
@@ -28,11 +29,15 @@ export function TaskView() {
   const [chatHistory, setChatHistory] = useState<{role: 'user'|'assistant', content: string}[]>([]);
   const [chatMessage, setChatMessage] = useState('');
   
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysis, setAnalysis] = useState<any>(null);
+
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const googleLogin = useGoogleLogin({
     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/presentations',
+    prompt: 'consent',
     onSuccess: (tokenResponse) => {
       sessionStorage.setItem('googleAccessToken', tokenResponse.access_token);
       processTaskWithToken(tokenResponse.access_token);
@@ -43,10 +48,39 @@ export function TaskView() {
     }
   });
 
+  const analyzeGuide = async () => {
+    if (!guideFile) return;
+    setIsAnalyzing(true);
+    setChatHistory(prev => [...prev, { role: 'assistant', content: 'Analizando la guía de actividades para extraer lo más importante...' }]);
+    try {
+      const guideBase64 = await toBase64(guideFile);
+      const res = await fetch('/api/analyze-guide', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task, course, guide: { base64: guideBase64, mimeType: guideFile.type } })
+      });
+      const data = await res.json();
+      if (data.error) {
+        setChatHistory(prev => [...prev, { role: 'assistant', content: `Error: ${data.error}` }]);
+      } else {
+        setAnalysis(data);
+        const md = `**Análisis de la Tarea**\n\n${data.summary}\n\n**Estructura del entregable:**\n${data.deliverableStructure.map((s: string) => `- ${s}`).join('\n')}\n\n**¡Importante! Antes de generar el documento final, por favor respóndeme lo siguiente por el chat:**\n${data.missingInformation.map((m: string) => `- ${m}`).join('\n')}`;
+        setChatHistory(prev => [...prev, { role: 'assistant', content: md }]);
+      }
+    } catch (e) {
+      setChatHistory(prev => [...prev, { role: 'assistant', content: 'Ocurrió un error al analizar la guía.' }]);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   useEffect(() => {
     if (taskId) {
       localforage.getItem<File>(`task-${taskId}-guide`).then(f => {
         if (f) setGuideFile(f);
+      });
+      localforage.getItem<File>(`task-${taskId}-rubric`).then(f => {
+        if (f) setRubricFile(f);
       });
       localforage.getItem<File[]>(`task-${taskId}-additional`).then(f => {
         if (f) setAdditionalFiles(f);
@@ -131,6 +165,19 @@ export function TaskView() {
     localforage.removeItem(`task-${taskId}-guide`);
   };
 
+  const handleRubricUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setRubricFile(file);
+      localforage.setItem(`task-${taskId}-rubric`, file);
+    }
+  };
+
+  const clearRubricFile = () => {
+    setRubricFile(null);
+    localforage.removeItem(`task-${taskId}-rubric`);
+  };
+
   const handleAdditionalFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
@@ -184,7 +231,16 @@ export function TaskView() {
         console.error('Error fetching global template', e);
       }
       
+      let rubricTemplate = null;
+      if (rubricFile) {
+        rubricTemplate = { base64: await toBase64(rubricFile), mimeType: rubricFile.type, name: rubricFile.name };
+      }
+      
       const localTemplates = await Promise.all(additionalFiles.map(async (f) => ({ base64: await toBase64(f), mimeType: f.type, name: f.name })));
+      const allTemplates = [...globalTemplates, ...localTemplates];
+      if (rubricTemplate) {
+        allTemplates.push(rubricTemplate);
+      }
       
       const effectiveProfile = course?.programOverride ? { ...profile, program: course.programOverride } : profile;
 
@@ -196,9 +252,10 @@ export function TaskView() {
           course,
           profile: effectiveProfile,
           guide: { base64: guideBase64, mimeType: guideFile!.type },
-          templates: [...globalTemplates, ...localTemplates],
+          templates: allTemplates,
           bibliography,
-          forumContext
+          forumContext,
+          chatHistory // <-- Pass the chat history so the AI has context from Step 1
         })
       });
       
@@ -309,7 +366,7 @@ export function TaskView() {
     }
   };
 
-  const captureAndAnalyze = async () => {
+  const captureAndAnalyze = async (customPrompt?: string) => {
     if (!videoRef.current) return;
     
     const canvas = document.createElement('canvas');
@@ -321,7 +378,8 @@ export function TaskView() {
     ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
     const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
     
-    const newHistory = [...chatHistory, { role: 'user' as const, content: '[Captura de pantalla enviada para análisis]' }];
+    const userMessage = customPrompt || '[Captura de pantalla enviada para análisis]';
+    const newHistory = [...chatHistory, { role: 'user' as const, content: userMessage }];
     setChatHistory(newHistory);
     
     try {
@@ -384,7 +442,7 @@ export function TaskView() {
 
         <div className="space-y-6">
           <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">1. Guía de Actividades y Rúbrica</h3>
+            <h3 className="font-semibold mb-3">1. Guía de Actividades</h3>
             <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
               <Upload className="w-4 h-4" />
               <span className="text-sm truncate max-w-[200px]">{guideFile ? guideFile.name : 'Subir archivo (PDF/Doc/Img)'}</span>
@@ -400,7 +458,23 @@ export function TaskView() {
           </div>
 
           <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">2. Archivos adicionales (Opcional)</h3>
+            <h3 className="font-semibold mb-3">2. Rúbrica de Evaluación (Opcional)</h3>
+            <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
+              <Upload className="w-4 h-4" />
+              <span className="text-sm truncate max-w-[200px]">{rubricFile ? rubricFile.name : 'Subir archivo (PDF/Doc/Img)'}</span>
+              <input type="file" onChange={handleRubricUpload} className="hidden" />
+            </label>
+            {rubricFile && (
+               <div className="flex justify-end mt-2">
+                 <button onClick={clearRubricFile} className="text-xs text-red-400 hover:text-red-300">
+                   Eliminar archivo
+                 </button>
+               </div>
+            )}
+          </div>
+
+          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+            <h3 className="font-semibold mb-3">3. Archivos adicionales (Opcional)</h3>
             <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
               <Upload className="w-4 h-4" />
               <span className="text-sm">Subir archivos</span>
@@ -458,14 +532,30 @@ export function TaskView() {
             />
           </div>
 
-          <button
-            onClick={generateTaskAssistance}
-            disabled={isProcessing || !guideFile}
-            className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-slate-900 dark:text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-cyan-900/20"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>{isProcessing ? 'Procesando...' : 'Generar Asistencia'}</span>
-          </button>
+          {!analysis ? (
+            <button
+              onClick={analyzeGuide}
+              disabled={isAnalyzing || !guideFile}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-indigo-900/20"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>{isAnalyzing ? 'Analizando Guía...' : 'Paso 1: Analizar Guía de Actividades'}</span>
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-sm text-emerald-600 dark:text-emerald-400">
+                <p><strong>Guía analizada.</strong> Responde por el chat lo que pide la IA antes de generar el documento final.</p>
+              </div>
+              <button
+                onClick={generateTaskAssistance}
+                disabled={isProcessing}
+                className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-slate-900 dark:text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-cyan-900/20"
+              >
+                <FileText className="w-5 h-5" />
+                <span>{isProcessing ? 'Procesando Documento...' : 'Paso 2: Generar Documento Final APA'}</span>
+              </button>
+            </div>
+          )}
 
           {task.docUrl && (
             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
@@ -490,10 +580,20 @@ export function TaskView() {
                 <div className="mt-3 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700">
                   <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-video object-cover bg-black" />
                 </div>
-                <button onClick={captureAndAnalyze} className="w-full mt-3 py-2 px-4 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-900 dark:text-white font-semibold flex items-center justify-center space-x-2">
-                  <Sparkles className="w-4 h-4" />
-                  <span>Analizar Captura</span>
-                </button>
+                <div className="mt-3 grid grid-cols-1 gap-2">
+                  <button onClick={() => captureAndAnalyze("Analiza esta pregunta de examen o quiz y proporcióname la respuesta correcta con una breve justificación.")} className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center space-x-2 transition-colors">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Resolver Pregunta</span>
+                  </button>
+                  <button onClick={() => captureAndAnalyze("Explícame de forma detallada qué concepto o información clave se muestra en esta pantalla para poder estudiarlo.")} className="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold flex items-center justify-center space-x-2 transition-colors">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Explicar Pantalla</span>
+                  </button>
+                  <button onClick={() => captureAndAnalyze("Analiza este comentario de foro o participación y sugiéreme cómo responder o enriquecer la discusión académicamente.")} className="w-full py-2 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold flex items-center justify-center space-x-2 transition-colors">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Analizar Foro</span>
+                  </button>
+                </div>
                 </>
              )}
           </div>

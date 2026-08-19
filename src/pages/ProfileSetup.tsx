@@ -74,6 +74,7 @@ export function ProfileSetup() {
 
   const testGoogleLogin = useGoogleLogin({
     scope: 'https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/drive.file',
+    prompt: 'consent',
     onSuccess: async (tokenResponse) => {
       try {
         setIsTestingDocs(true);
@@ -94,7 +95,11 @@ export function ProfileSetup() {
         if (!createRes.ok) {
           const errData = await createRes.json().catch(() => ({}));
           console.error('Google Docs API Error:', errData);
-          throw new Error(errData?.error?.message || 'Error creando documento en Google Docs');
+          const errorMsg = errData?.error?.message || '';
+          if (errorMsg.includes('insufficient authentication scopes')) {
+            throw new Error('IMPORTANTE: Al iniciar sesión con Google, debes marcar la casilla "Ver, crear y editar todos tus archivos de Google Docs" (Select all) para permitir que la app cree el documento. Por favor, intenta de nuevo y marca las casillas.');
+          }
+          throw new Error(errorMsg || 'Error creando documento en Google Docs');
         }
         const docData = await createRes.json();
         const newUrl = `https://docs.google.com/document/d/${docData.documentId}/edit`;
