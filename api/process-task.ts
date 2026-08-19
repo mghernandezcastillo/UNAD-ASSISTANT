@@ -39,6 +39,16 @@ export default async function handler(req: any, res: any) {
       historyText += "USAR ESTA INFORMACIÓN OBLIGATORIAMENTE PARA DESARROLLAR EL CONTENIDO DEL TRABAJO.\n\n";
     }
 
+    let globalMemoryText = "";
+    if (course?.globalMemory) {
+       globalMemoryText = `\nMEMORIA GLOBAL DEL CURSO (Aportes previos, compañeros, contextos anteriores):\n${course.globalMemory}\nUSA ESTA MEMORIA PARA REFERENCIAR O CONTINUAR EL TRABAJO ANTERIOR SI ES NECESARIO.\n`;
+    }
+
+    let forumText = "";
+    if (forumContext) {
+       forumText = `\nCONTEXTO DEL FORO (Aportes actuales):\n${forumContext}\nTEN ESTO EN CUENTA PARA EL DESARROLLO.\n`;
+    }
+
     const promptText = `
 Eres un asistente experto en NORMAS APA 7ma edición para estudiantes de la UNAD.
 Debes generar el documento ESQUELETO FINAL COMPLETO según la guía de actividades y rúbrica.
@@ -50,6 +60,8 @@ Debes generar el documento ESQUELETO FINAL COMPLETO según la guía de actividad
 - Programa: ${profile?.program || "Programa"}
 
 ${historyText}
+${globalMemoryText}
+${forumText}
 
 REGLAS ESTRICTAS DE NORMAS APA Y GENERACIÓN:
 1. PORTADA: Debe ser la primera página. Totalmente centrada. Usa espacios en blanco al inicio para que el texto empiece un poco más abajo. Incluye Título (en negrita), tu Nombre, Universidad, Escuela, Programa, Nombre del curso, Tutor y Año.

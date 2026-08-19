@@ -91,6 +91,71 @@ export function TaskView() {
     }
   }, [taskId]);
 
+  const [isExtracting, setIsExtracting] = useState(false);
+
+  const captureForumAndExtract = async () => {
+    try {
+      setIsExtracting(true);
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      
+      const tempVideo = document.createElement('video');
+      tempVideo.srcObject = stream;
+      tempVideo.play();
+      
+      // Wait for stream to settle
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = tempVideo.videoWidth;
+      canvas.height = tempVideo.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
+        const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+        
+        // Stop stream immediately
+        stream.getTracks().forEach(t => t.stop());
+        
+        setChatHistory(prev => [...prev, { role: 'assistant', content: 'Extrayendo información del foro desde la captura...' }]);
+        
+        const res = await fetch('/api/extract-forum', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: base64Image })
+        });
+        
+        const data = await res.json();
+        if (data.text) {
+          const newContext = forumContext ? forumContext + '\n\n' + data.text : data.text;
+          setForumContext(newContext);
+          
+          // Save to task
+          await updateDoc(doc(db, 'courses', courseId!, 'tasks', taskId!), {
+             forumContext: newContext
+          });
+
+          // Append to course's global memory
+          const courseDocRef = doc(db, 'courses', courseId!);
+          const courseSnap = await getDoc(courseDocRef);
+          if (courseSnap.exists()) {
+             const currentMemory = courseSnap.data().globalMemory || '';
+             const updatedMemory = currentMemory ? currentMemory + '\n\n' + data.text : data.text;
+             await updateDoc(courseDocRef, { globalMemory: updatedMemory });
+          }
+
+          setChatHistory(prev => [...prev, { role: 'assistant', content: '¡Texto extraído! Se ha guardado en la memoria global del curso y en el contexto de esta tarea.' }]);
+        } else {
+          setChatHistory(prev => [...prev, { role: 'assistant', content: 'No se pudo extraer texto. Intenta de nuevo.' }]);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setChatHistory(prev => [...prev, { role: 'assistant', content: 'Extracción cancelada o fallida.' }]);
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
   const saveContextToDb = async () => {
     if (!user || !taskId) return;
     try {
@@ -491,7 +556,18 @@ export function TaskView() {
           </div>
 
           <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">3. Referentes y Foro (Opcional)</h3>
+            <h3 className="font-semibold mb-3 flex items-center justify-between">
+               <span>3. Referentes y Foro (Memoria Súper)</span>
+               <button 
+                  onClick={captureForumAndExtract}
+                  disabled={isExtracting}
+                  className="flex items-center space-x-1 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs py-1.5 px-3 rounded-lg transition-colors font-medium"
+               >
+                  <Monitor className="w-3.5 h-3.5" />
+                  <span>{isExtracting ? 'Extrayendo...' : 'Extraer Foro de Pantalla'}</span>
+               </button>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Los datos extraídos se guardarán en la "Memoria Acumulativa" de este curso para que la IA lo recuerde en tareas futuras.</p>
             <textarea
               value={bibliography}
               onChange={e => setBibliography(e.target.value)}

@@ -45,8 +45,12 @@ Responde de forma útil, directa, y ayúdale a corregir, redactar, o mejorar lo 
       }
     }
 
+    if (course?.globalMemory) {
+      conversationContext += `MEMORIA ACUMULATIVA DEL CURSO (Historial de este semestre para esta materia):\n${course.globalMemory}\n\n`;
+    }
+
     if (forumContext) {
-      conversationContext += `Contexto de la actividad (Foro/Apuntes guardados): \n${forumContext}\n\n`;
+      conversationContext += `Contexto del Foro Actual (Aportes recientes):\n${forumContext}\n\n`;
     }
 
     const promptParts: any[] = [];
