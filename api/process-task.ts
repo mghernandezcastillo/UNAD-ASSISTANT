@@ -58,6 +58,7 @@ REGLAS ESTRICTAS DE NORMAS APA Y GENERACIÓN:
 3. ESTRUCTURA: Revisa qué pide la guía y crea esa estructura exacta (Introducción, Objetivos, Desarrollo, etc.).
 4. REDACCIÓN Y PÁRRAFOS: Escribe párrafos académicos. Justifica/Alinea a la izquierda según APA, los títulos principales van centrados en negrita, los secundarios a la izquierda en negrita. Usa **texto** para negritas. IMPORTANTE: NO uses sintaxis markdown de viñetas (* o -) a menos que sea estrictamente necesario. Usa párrafos de texto continuo. No uses # para los títulos.
 5. REFERENCIAS BIBLIOGRÁFICAS: Haz la lista al final en estricto formato APA 7.
+6. IMÁGENES Y CAPTURAS DE PANTALLA: Como eres una IA generadora de texto, no puedes pegar las capturas de pantalla personales del estudiante. Si la guía exige evidencias gráficas (ej. capturas del foro, mapas conceptuales, diagramas), DEBES dejar un espacio claramente visible usando este formato exacto: **[📸 INSERTAR AQUÍ CAPTURA DE PANTALLA: Descripción exacta de lo que el estudiante debe pegar aquí]**.
 `;
 
     console.log("[Vercel /api/process-task] Procesando con Gemini...");
