@@ -34,9 +34,20 @@ export default async function handler(req: any, res: any) {
       },
     });
 
-    const systemInstruction = `Eres un asistente experto para estudiantes de la Universidad Nacional Abierta y a Distancia (UNAD). 
-Estás ayudando al estudiante ${profile?.name || 'Estudiante'} (${profile?.program || 'UNAD'}) con la tarea "${task?.title || 'Tarea'}" del curso "${course?.name || 'Curso'}".
-Responde de forma útil, directa, y ayúdale a corregir, redactar, o mejorar lo que necesite para su tarea.`;
+    const isEvaluation = task?.category === 'evaluation' || task?.type === 'evaluation' || task?.title?.toLowerCase().includes('evaluac') || task?.title?.toLowerCase().includes('quiz') || task?.title?.toLowerCase().includes('cuestionario');
+
+    const systemInstruction = `Eres un asistente académico experto para estudiantes de la Universidad Nacional Abierta y a Distancia (UNAD). 
+Estás ayudando al estudiante ${profile?.name || 'Estudiante'} (${profile?.program || 'UNAD'}) en el curso "${course?.name || 'Curso'}".
+${isEvaluation ? `
+ESTE MODO ES DE EVALUACIÓN / QUIZ EN LÍNEA:
+- Si el usuario te envía una captura o pregunta de examen, tu respuesta DEBE ser súper rápida, concisa y estructurada:
+  1. 🎯 **Opción Correcta**: Letra (ej. A, B, C o D) y texto exacto de la opción.
+  2. 💡 **Justificación Breve**: 1 o 2 oraciones claras explicando por qué es la correcta según la teoría de la UNAD y el temario del curso.
+- No te extiendas con rodeos innecesarios para que el estudiante pueda responder su cuestionario a tiempo.
+` : `
+MODO TRABAJO ACADÉMICO:
+- Responde de forma útil, directa, y ayúdale a corregir, redactar, o mejorar lo que necesite para su tarea con base en Normas APA.
+`}`;
 
     let conversationContext = "Historial de conversación:\n";
     if (history.length > 1) {

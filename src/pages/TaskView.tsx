@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ArrowLeft, FileText, Upload, Sparkles, Monitor, Play, Check, Send } from 'lucide-react';
+import { ArrowLeft, FileText, Upload, Sparkles, Monitor, Play, Check, Send, Zap, HelpCircle, Maximize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useGoogleLogin } from '@react-oauth/google';
 import localforage from 'localforage';
@@ -34,6 +34,41 @@ export function TaskView() {
 
   const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isCapturingQuestion, setIsCapturingQuestion] = useState(false);
+
+  // Determine if this task is an evaluation/quiz
+  const isEvaluation = task?.category === 'evaluation' || task?.type === 'evaluation' || task?.title?.toLowerCase().includes('evaluac') || task?.title?.toLowerCase().includes('quiz') || task?.title?.toLowerCase().includes('cuestionario');
+
+  // Fix video element screenStream attachment
+  useEffect(() => {
+    if (videoRef.current && screenStream) {
+      videoRef.current.srcObject = screenStream;
+      videoRef.current.play().catch(err => console.error("Error playing video preview:", err));
+    }
+  }, [screenStream]);
+
+  // Global easy keyboard shortcut (F2 or Shift+Space or Alt+Z)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in a text field
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        return;
+      }
+
+      if (e.key === 'F2' || (e.shiftKey && e.code === 'Space') || (e.altKey && (e.key === 'z' || e.key === 'Z' || e.key === 'q' || e.key === 'Q'))) {
+        e.preventDefault();
+        if (!screenStream) {
+          toggleScreenShare();
+        } else {
+          captureAndAnalyze("Analiza esta pregunta de examen o quiz y proporciona la opción correcta (ej. A, B, C, D) con una justificación breve.");
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [screenStream, chatHistory, guideFile, additionalFiles, groupDraftFile, course, profile, forumContext]);
 
   const googleLogin = useGoogleLogin({
     scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/presentations',
@@ -417,33 +452,60 @@ export function TaskView() {
       setScreenStream(null);
     } else {
       try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: {
+            displaySurface: "browser",
+          } as any,
+          // Suppress Chrome extra popups where supported
+          selfBrowserSurface: "exclude",
+          surfaceSwitching: "exclude",
+          systemAudio: "exclude"
+        } as any);
+        
         setScreenStream(stream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
         stream.getVideoTracks()[0].onended = () => {
           setScreenStream(null);
         };
       } catch (err) {
-        console.error(err);
+        console.error("Error starting screen share:", err);
+      }
+    }
+  };
+
+  const openPictureInPicture = async () => {
+    if (videoRef.current && document.pictureInPictureEnabled) {
+      try {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else {
+          await videoRef.current.requestPictureInPicture();
+        }
+      } catch (err) {
+        console.error('Error with Picture in Picture:', err);
       }
     }
   };
 
   const captureAndAnalyze = async (customPrompt?: string) => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || videoRef.current.videoWidth === 0) {
+      alert("La pantalla compartida aún no está lista o no tiene señal.");
+      return;
+    }
     
+    setIsCapturingQuestion(true);
     const canvas = document.createElement('canvas');
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      setIsCapturingQuestion(false);
+      return;
+    }
     
     ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-    const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+    const base64Image = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
     
-    const userMessage = customPrompt || '[Captura de pantalla enviada para análisis]';
+    const userMessage = customPrompt || '[Captura de pantalla enviada para análisis de pregunta]';
     const newHistory = [...chatHistory, { role: 'user' as const, content: userMessage }];
     setChatHistory(newHistory);
     
@@ -487,7 +549,9 @@ export function TaskView() {
       setChatHistory([...newHistory, { role: 'assistant', content: data.answer || 'Sin respuesta' }]);
     } catch (err) {
       console.error(err);
-      setChatHistory([...newHistory, { role: 'assistant', content: 'Error analizando la imagen.' }]);
+      setChatHistory([...newHistory, { role: 'assistant', content: 'Error analizando la imagen de la pregunta.' }]);
+    } finally {
+      setIsCapturingQuestion(false);
     }
   };
 
@@ -502,12 +566,38 @@ export function TaskView() {
           <span>Volver al curso</span>
         </button>
 
+        <div className="flex items-center space-x-2 mb-2">
+          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${isEvaluation ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'}`}>
+            {isEvaluation ? '📝 Modo Evaluación / Quiz' : '📄 Trabajo Escrito APA'}
+          </span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            {task.type === 'collaborative' ? 'Colaborativo' : 'Individual'}
+          </span>
+        </div>
+
         <h1 className="text-2xl font-bold mb-1">{task.title}</h1>
-        <p className="text-cyan-600 dark:text-cyan-400 text-sm mb-6">{task.type === 'individual' ? 'Individual' : 'Colaborativa'}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+          {task.tutor ? `Tutor: ${task.tutor}` : 'Sin tutor asignado'}
+        </p>
+
+        {/* Shortcut Banner for Exam */}
+        {isEvaluation && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 mb-6 text-xs text-amber-300 space-y-1">
+            <div className="font-bold flex items-center space-x-1.5 text-amber-400">
+              <Zap className="w-4 h-4 text-amber-400" />
+              <span>Atajo Rápido para Exámenes</span>
+            </div>
+            <p className="text-slate-300">
+              Presiona la tecla <kbd className="bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-500/40 text-amber-200 font-mono font-bold">F2</kbd> o <kbd className="bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-500/40 text-amber-200 font-mono font-bold">Shift + Espacio</kbd> en cualquier momento para resolver la pregunta que esté en pantalla.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-6">
           <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">1. Guía de Actividades</h3>
+            <h3 className="font-semibold mb-3">
+              {isEvaluation ? '1. Temario / Guía del Examen' : '1. Guía de Actividades'}
+            </h3>
             <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
               <Upload className="w-4 h-4" />
               <span className="text-sm truncate max-w-[200px]">{guideFile ? guideFile.name : 'Subir archivo (PDF/Doc/Img)'}</span>
@@ -522,27 +612,31 @@ export function TaskView() {
             )}
           </div>
 
-          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">2. Rúbrica de Evaluación (Opcional)</h3>
-            <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
-              <Upload className="w-4 h-4" />
-              <span className="text-sm truncate max-w-[200px]">{rubricFile ? rubricFile.name : 'Subir archivo (PDF/Doc/Img)'}</span>
-              <input type="file" onChange={handleRubricUpload} className="hidden" />
-            </label>
-            {rubricFile && (
-               <div className="flex justify-end mt-2">
-                 <button onClick={clearRubricFile} className="text-xs text-red-400 hover:text-red-300">
-                   Eliminar archivo
-                 </button>
-               </div>
-            )}
-          </div>
+          {!isEvaluation && (
+            <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+              <h3 className="font-semibold mb-3">2. Rúbrica de Evaluación (Opcional)</h3>
+              <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
+                <Upload className="w-4 h-4" />
+                <span className="text-sm truncate max-w-[200px]">{rubricFile ? rubricFile.name : 'Subir archivo (PDF/Doc/Img)'}</span>
+                <input type="file" onChange={handleRubricUpload} className="hidden" />
+              </label>
+              {rubricFile && (
+                 <div className="flex justify-end mt-2">
+                   <button onClick={clearRubricFile} className="text-xs text-red-400 hover:text-red-300">
+                     Eliminar archivo
+                   </button>
+                 </div>
+              )}
+            </div>
+          )}
 
           <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">3. Archivos adicionales (Opcional)</h3>
+            <h3 className="font-semibold mb-3">
+              {isEvaluation ? '2. Material y Lecturas de Apoyo' : '3. Archivos adicionales (Opcional)'}
+            </h3>
             <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors">
               <Upload className="w-4 h-4" />
-              <span className="text-sm">Subir archivos</span>
+              <span className="text-sm">Subir lecturas / diapositivas</span>
               <input type="file" multiple onChange={handleAdditionalFiles} className="hidden" />
             </label>
             {additionalFiles.length > 0 && (
@@ -557,83 +651,90 @@ export function TaskView() {
 
           <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
             <h3 className="font-semibold mb-3 flex items-center justify-between">
-               <span>3. Referentes y Foro (Memoria Súper)</span>
-               <button 
-                  onClick={captureForumAndExtract}
-                  disabled={isExtracting}
-                  className="flex items-center space-x-1 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs py-1.5 px-3 rounded-lg transition-colors font-medium"
-               >
-                  <Monitor className="w-3.5 h-3.5" />
-                  <span>{isExtracting ? 'Extrayendo...' : 'Extraer Foro de Pantalla'}</span>
-               </button>
+               <span>{isEvaluation ? '3. Referentes Bibliográficos del Examen' : '3. Referentes y Foro (Memoria Súper)'}</span>
+               {!isEvaluation && (
+                 <button 
+                    onClick={captureForumAndExtract}
+                    disabled={isExtracting}
+                    className="flex items-center space-x-1 bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs py-1.5 px-3 rounded-lg transition-colors font-medium"
+                 >
+                    <Monitor className="w-3.5 h-3.5" />
+                    <span>{isExtracting ? 'Extrayendo...' : 'Extraer Foro de Pantalla'}</span>
+                 </button>
+               )}
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Los datos extraídos se guardarán en la "Memoria Acumulativa" de este curso para que la IA lo recuerde en tareas futuras.</p>
             <textarea
               value={bibliography}
               onChange={e => setBibliography(e.target.value)}
               onBlur={saveContextToDb}
-              placeholder="Pega aquí los contenidos o referentes bibliográficos..."
-              className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 mb-3 h-20 resize-none"
+              placeholder={isEvaluation ? "Pega aquí los contenidos, unidades temáticas o libros que entrarán en la evaluación..." : "Pega aquí los contenidos o referentes bibliográficos..."}
+              className={`w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 resize-none ${isEvaluation ? 'h-28' : 'h-20 mb-3'}`}
             />
-            <textarea
-              value={forumContext}
-              onChange={e => setForumContext(e.target.value)}
-              onBlur={saveContextToDb}
-              placeholder="Pega aquí aportes de compañeros en el foro..."
-              className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
-            />
-          </div>
-
-          <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-            <h3 className="font-semibold mb-3">4. Avance del Grupo (Auditoría)</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Sube el documento de tus compañeros para saber qué falta y generar tu aporte sin dañar el de ellos.</p>
-            <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors mb-3">
-              <Upload className="w-4 h-4" />
-              <span className="text-sm truncate max-w-[200px]">{groupDraftFile ? groupDraftFile.name : 'Subir avance (.docx/pdf/img)'}</span>
-              <input type="file" onChange={handleGroupDraftUpload} className="hidden" />
-            </label>
-            {groupDraftFile && (
-               <div className="flex justify-end mb-3">
-                 <button onClick={clearGroupDraftFile} className="text-xs text-red-400 hover:text-red-300">
-                   Eliminar archivo de avance
-                 </button>
-               </div>
+            {!isEvaluation && (
+              <textarea
+                value={forumContext}
+                onChange={e => setForumContext(e.target.value)}
+                onBlur={saveContextToDb}
+                placeholder="Pega aquí aportes de compañeros en el foro..."
+                className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
+              />
             )}
-            <textarea
-              value={groupDraftText}
-              onChange={e => setGroupDraftText(e.target.value)}
-              onBlur={saveContextToDb}
-              placeholder="O pega aquí el texto del avance de tus compañeros..."
-              className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
-            />
           </div>
 
-          {!analysis ? (
-            <button
-              onClick={analyzeGuide}
-              disabled={isAnalyzing || !guideFile}
-              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-indigo-900/20"
-            >
-              <Sparkles className="w-5 h-5" />
-              <span>{isAnalyzing ? 'Analizando Guía...' : 'Paso 1: Analizar Guía de Actividades'}</span>
-            </button>
-          ) : (
-            <div className="space-y-3">
-              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-sm text-emerald-600 dark:text-emerald-400">
-                <p><strong>Guía analizada.</strong> Responde por el chat lo que pide la IA antes de generar el documento final.</p>
-              </div>
-              <button
-                onClick={generateTaskAssistance}
-                disabled={isProcessing}
-                className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-slate-900 dark:text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-cyan-900/20"
-              >
-                <FileText className="w-5 h-5" />
-                <span>{isProcessing ? 'Procesando Documento...' : 'Paso 2: Generar Documento Final APA'}</span>
-              </button>
+          {!isEvaluation && (
+            <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+              <h3 className="font-semibold mb-3">4. Avance del Grupo (Auditoría)</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Sube el documento de tus compañeros para saber qué falta y generar tu aporte sin dañar el de ellos.</p>
+              <label className="w-full flex items-center justify-center space-x-2 bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 py-2 px-4 rounded-lg cursor-pointer transition-colors mb-3">
+                <Upload className="w-4 h-4" />
+                <span className="text-sm truncate max-w-[200px]">{groupDraftFile ? groupDraftFile.name : 'Subir avance (.docx/pdf/img)'}</span>
+                <input type="file" onChange={handleGroupDraftUpload} className="hidden" />
+              </label>
+              {groupDraftFile && (
+                 <div className="flex justify-end mb-3">
+                   <button onClick={clearGroupDraftFile} className="text-xs text-red-400 hover:text-red-300">
+                     Eliminar archivo de avance
+                   </button>
+                 </div>
+              )}
+              <textarea
+                value={groupDraftText}
+                onChange={e => setGroupDraftText(e.target.value)}
+                onBlur={saveContextToDb}
+                placeholder="O pega aquí el texto del avance de tus compañeros..."
+                className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500 h-20 resize-none"
+              />
             </div>
           )}
 
-          {task.docUrl && (
+          {!isEvaluation && (
+            !analysis ? (
+              <button
+                onClick={analyzeGuide}
+                disabled={isAnalyzing || !guideFile}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-indigo-900/20"
+              >
+                <Sparkles className="w-5 h-5" />
+                <span>{isAnalyzing ? 'Analizando Guía...' : 'Paso 1: Analizar Guía de Actividades'}</span>
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-sm text-emerald-600 dark:text-emerald-400">
+                  <p><strong>Guía analizada.</strong> Responde por el chat lo que pide la IA antes de generar el documento final.</p>
+                </div>
+                <button
+                  onClick={generateTaskAssistance}
+                  disabled={isProcessing}
+                  className="w-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-300 dark:bg-slate-800 disabled:text-slate-500 text-slate-900 dark:text-white font-medium py-3 rounded-xl flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-cyan-900/20"
+                >
+                  <FileText className="w-5 h-5" />
+                  <span>{isProcessing ? 'Procesando Documento...' : 'Paso 2: Generar Documento Final APA'}</span>
+                </button>
+              </div>
+            )
+          )}
+
+          {!isEvaluation && task.docUrl && (
             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
               <h3 className="text-green-400 font-semibold flex items-center space-x-2 mb-2">
                 <Check className="w-4 h-4" />
@@ -645,30 +746,70 @@ export function TaskView() {
             </div>
           )}
 
+          {/* Screen Share / Exam Assistant Center */}
           <div className="bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-             <h3 className="font-semibold mb-3">Herramientas</h3>
-             <button onClick={toggleScreenShare} className={`w-full py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors ${screenStream ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-slate-300 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'}`}>
+             <h3 className="font-semibold mb-3 flex items-center justify-between">
+                <span>{isEvaluation ? '⚡ Asistencia de Examen en Vivo' : 'Herramientas de Pantalla'}</span>
+                {screenStream && (
+                  <span className="flex items-center space-x-1.5 text-xs text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>En Vivo</span>
+                  </span>
+                )}
+             </h3>
+             <button onClick={toggleScreenShare} className={`w-full py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 font-medium transition-colors ${screenStream ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30' : 'bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-900/20'}`}>
                 <Monitor className="w-4 h-4" />
-                <span>{screenStream ? 'Detener Compartir' : 'Compartir Pantalla (Exámenes/Foro)'}</span>
+                <span>{screenStream ? 'Detener Compartir Pantalla' : isEvaluation ? 'Compartir Pantalla del Examen' : 'Compartir Pantalla (Exámenes/Foro)'}</span>
              </button>
+
              {screenStream && (
                 <>
-                <div className="mt-3 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700">
-                  <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-video object-cover bg-black" />
-                </div>
-                <div className="mt-3 grid grid-cols-1 gap-2">
-                  <button onClick={() => captureAndAnalyze("Analiza esta pregunta de examen o quiz y proporcióname la respuesta correcta con una breve justificación.")} className="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold flex items-center justify-center space-x-2 transition-colors">
-                    <Sparkles className="w-4 h-4" />
-                    <span>Resolver Pregunta</span>
+                <div className="mt-3 rounded-lg overflow-hidden border border-slate-300 dark:border-slate-700 relative bg-black">
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    muted 
+                    className="w-full aspect-video object-contain bg-black"
+                    onLoadedMetadata={(e) => (e.target as HTMLVideoElement).play()}
+                  />
+                  <button 
+                    onClick={openPictureInPicture} 
+                    title="Abrir Ventana Flotante (PiP) para no salir del examen"
+                    className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white p-1.5 rounded-lg border border-white/20 text-xs flex items-center space-x-1"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                    <span>Flotante (PiP)</span>
                   </button>
-                  <button onClick={() => captureAndAnalyze("Explícame de forma detallada qué concepto o información clave se muestra en esta pantalla para poder estudiarlo.")} className="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold flex items-center justify-center space-x-2 transition-colors">
+                </div>
+
+                <div className="mt-3 grid grid-cols-1 gap-2">
+                  <button 
+                    onClick={() => captureAndAnalyze("Analiza esta pregunta de examen o quiz y proporciona la opción correcta (ej. A, B, C, D) con una justificación breve sustentada en la bibliografía.")} 
+                    disabled={isCapturingQuestion}
+                    className="w-full py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-bold flex items-center justify-center space-x-2 transition-colors shadow-lg shadow-emerald-900/20"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span>{isCapturingQuestion ? 'Analizando Pregunta...' : '⚡ Resolver Pregunta (F2)'}</span>
+                  </button>
+                  <button 
+                    onClick={() => captureAndAnalyze("Explícame de forma detallada qué concepto o información clave se muestra en esta pantalla para poder estudiarlo.")} 
+                    disabled={isCapturingQuestion}
+                    className="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-semibold flex items-center justify-center space-x-2 transition-colors"
+                  >
                     <Sparkles className="w-4 h-4" />
                     <span>Explicar Pantalla</span>
                   </button>
-                  <button onClick={() => captureAndAnalyze("Analiza este comentario de foro o participación y sugiéreme cómo responder o enriquecer la discusión académicamente.")} className="w-full py-2 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-semibold flex items-center justify-center space-x-2 transition-colors">
-                    <Sparkles className="w-4 h-4" />
-                    <span>Analizar Foro</span>
-                  </button>
+                  {!isEvaluation && (
+                    <button 
+                      onClick={() => captureAndAnalyze("Analiza este comentario de foro o participación y sugiéreme cómo responder o enriquecer la discusión académicamente.")} 
+                      disabled={isCapturingQuestion}
+                      className="w-full py-2 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-sm font-semibold flex items-center justify-center space-x-2 transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span>Analizar Foro</span>
+                    </button>
+                  )}
                 </div>
                 </>
              )}
@@ -684,7 +825,7 @@ export function TaskView() {
               {chatHistory.map((msg, idx) => (
                 <div key={idx} className={`p-6 rounded-xl ${msg.role === 'assistant' ? 'bg-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800' : 'bg-cyan-900/20 border border-cyan-900/30 ml-12'}`}>
                   {msg.role === 'user' && <div className="font-semibold text-cyan-600 dark:text-cyan-400 mb-2">Tú</div>}
-                  {msg.role === 'assistant' && <div className="font-semibold text-amber-400 mb-2 flex items-center space-x-2"><Sparkles className="w-4 h-4"/><span>Asistente IA</span></div>}
+                  {msg.role === 'assistant' && <div className="font-semibold text-amber-400 mb-2 flex items-center space-x-2"><Sparkles className="w-4 h-4"/><span>Asistente IA UNAD</span></div>}
                   <div className="prose prose-invert prose-cyan max-w-none">
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
@@ -692,10 +833,29 @@ export function TaskView() {
               ))}
             </div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500">
-              <Sparkles className="w-16 h-16 mb-4 opacity-50" />
-              <h2 className="text-xl font-medium">Asistente IA UNAD</h2>
-              <p className="max-w-md text-center mt-2">Sube la guía de la actividad y haz clic en "Generar Asistencia" para que la IA construya el plan de trabajo y el documento de entrega.</p>
+            <div className="h-full flex flex-col items-center justify-center text-slate-500 text-center max-w-md mx-auto p-6">
+              {isEvaluation ? (
+                <>
+                  <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-4">
+                    <Zap className="w-8 h-8" />
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Modo Evaluación en Vivo</h2>
+                  <p className="text-sm text-slate-400 mb-6">
+                    Haz clic en <strong>"Compartir Pantalla del Examen"</strong> a la izquierda. Durante la prueba solo presiona la tecla <strong className="text-amber-400">F2</strong> o <strong className="text-amber-400">Shift + Espacio</strong> para que la IA lea la pregunta y te dé la opción correcta al instante.
+                  </p>
+                  <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 w-full text-left text-xs space-y-2 text-slate-400">
+                    <p className="font-semibold text-slate-200">Consejos para el examen:</p>
+                    <p>• Pega los temas o capítulos en el cuadro de <strong>Referentes Bibliográficos</strong> para respuestas 100% exactas.</p>
+                    <p>• Usa el botón <strong>Flotante (PiP)</strong> si quieres ver la transmisión en miniatura.</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-16 h-16 mb-4 opacity-50" />
+                  <h2 className="text-xl font-medium text-slate-800 dark:text-slate-100">Asistente IA UNAD</h2>
+                  <p className="mt-2 text-sm text-slate-400">Sube la guía de la actividad y haz clic en "Analizar Guía" para que la IA construya el plan de trabajo y el documento de entrega según Normas APA.</p>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -708,7 +868,7 @@ export function TaskView() {
               value={chatMessage}
               onChange={e => setChatMessage(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
-              placeholder="Ej: El profesor me pidió corregir el punto 2..." 
+              placeholder={isEvaluation ? "Escribe o pega una pregunta de examen aquí..." : "Ej: El profesor me pidió corregir el punto 2..."} 
               className="flex-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
             />
             <button 

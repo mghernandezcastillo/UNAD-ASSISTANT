@@ -49,13 +49,16 @@ export default async function handler(req: any, res: any) {
        forumText = `\nCONTEXTO DEL FORO (Aportes actuales):\n${forumContext}\nTEN ESTO EN CUENTA PARA EL DESARROLLO.\n`;
     }
 
+    const tutorInfo = task?.tutor?.trim() ? `- Tutor: ${task.tutor.trim()}` : '- Tutor: No aplica / Sin tutor asignado (Omitir línea del tutor en la portada)';
+    const portadaTutorRule = task?.tutor?.trim() ? `Tutor (${task.tutor.trim()})` : `(No incluir línea de tutor porque no aplica)`;
+
     const promptText = `
 Eres un asistente experto en NORMAS APA 7ma edición para estudiantes de la UNAD.
 Debes generar el documento ESQUELETO FINAL COMPLETO según la guía de actividades y rúbrica.
 - Curso: ${course?.name || "Curso"} (${course?.code || ""})
 - Tarea: ${task?.title || "Tarea"}
 - Tipo: ${task?.type || "Individual"}
-- Tutor: ${task?.tutor || "[Nombre del Tutor]"}
+${tutorInfo}
 - Estudiante: ${profile?.name || "Estudiante"}
 - Programa: ${profile?.program || "Programa"}
 
@@ -64,7 +67,7 @@ ${globalMemoryText}
 ${forumText}
 
 REGLAS ESTRICTAS DE NORMAS APA Y GENERACIÓN:
-1. PORTADA: Debe ser la primera página. Totalmente centrada. Usa espacios en blanco al inicio para que el texto empiece un poco más abajo. Incluye Título (en negrita), tu Nombre, Universidad, Escuela, Programa, Nombre del curso, Tutor y Año.
+1. PORTADA: Debe ser la primera página. Totalmente centrada. Usa espacios en blanco al inicio para que el texto empiece un poco más abajo. Incluye Título (en negrita), tu Nombre, Universidad, Escuela, Programa, Nombre del curso, ${portadaTutorRule} y Año. Si no hay tutor asignado, NO inventes ni pongas corchetes de tutor; simplemente salta esa línea.
 2. DELIMITADOR DE PÁGINA: Debes separar CADA PÁGINA O SECCIÓN con este delimitador EXACTO en una línea nueva:
 ---PAGE_BREAK---
 3. ESTRUCTURA: Revisa qué pide la guía y crea esa estructura exacta (Introducción, Objetivos, Desarrollo, etc.).

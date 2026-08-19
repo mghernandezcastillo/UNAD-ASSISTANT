@@ -17,6 +17,7 @@ export function CourseView() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState('');
   const [modalType, setModalType] = useState('individual');
+  const [modalCategory, setModalCategory] = useState<'report' | 'evaluation'>('report');
   const [modalTutor, setModalTutor] = useState('');
   const [editingTask, setEditingTask] = useState<any>(null);
 
@@ -62,6 +63,7 @@ export function CourseView() {
     setEditingTask(null);
     setModalTitle('');
     setModalType('individual');
+    setModalCategory('report');
     setModalTutor('');
     setIsModalOpen(true);
   };
@@ -70,6 +72,7 @@ export function CourseView() {
     setEditingTask(task);
     setModalTitle(task.title);
     setModalType(task.type || 'individual');
+    setModalCategory(task.category || (task.type === 'evaluation' ? 'evaluation' : 'report'));
     setModalTutor(task.tutor || '');
     setIsModalOpen(true);
   };
@@ -88,7 +91,8 @@ export function CourseView() {
         await setDoc(doc(db, 'users', user.uid, 'tasks', editingTask.taskId), {
           title: modalTitle,
           type: modalType,
-          tutor: modalTutor,
+          category: modalCategory,
+          tutor: modalTutor.trim(),
           updatedAt: Date.now()
         }, { merge: true });
       } else {
@@ -102,7 +106,8 @@ export function CourseView() {
           description: '',
           status: 'pending',
           type: modalType,
-          tutor: modalTutor,
+          category: modalCategory,
+          tutor: modalTutor.trim(),
           docUrl: '',
           createdAt: Date.now(),
           updatedAt: Date.now()
@@ -157,10 +162,18 @@ export function CourseView() {
                 <div>
                   <h3 className="font-semibold text-lg">{task.title}</h3>
                   <div className="flex items-center space-x-3 text-sm mt-1">
-                    <span className={`px-2 py-0.5 rounded-full ${task.type === 'individual' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                      {task.type === 'individual' ? 'Individual' : 'Colaborativa'}
+                    <span className={`px-2 py-0.5 rounded-full ${task.category === 'evaluation' || task.type === 'evaluation' ? 'bg-amber-500/10 text-amber-500' : 'bg-cyan-500/10 text-cyan-400'}`}>
+                      {task.category === 'evaluation' || task.type === 'evaluation' ? '📝 Evaluación / Quiz' : '📄 Trabajo Escrito'}
                     </span>
-                    <span className={`px-2 py-0.5 rounded-full ${task.status === 'completed' ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                    <span className={`px-2 py-0.5 rounded-full ${task.type === 'collaborative' ? 'bg-purple-500/10 text-purple-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                      {task.type === 'collaborative' ? 'Colaborativa' : 'Individual'}
+                    </span>
+                    {task.tutor ? (
+                      <span className="text-xs text-slate-500 dark:text-slate-400">Tutor: {task.tutor}</span>
+                    ) : (
+                      <span className="text-xs text-slate-400 dark:text-slate-500 italic">Sin tutor</span>
+                    )}
+                    <span className={`px-2 py-0.5 rounded-full ${task.status === 'completed' ? 'bg-green-500/10 text-green-400' : 'bg-slate-500/10 text-slate-400'}`}>
                       {task.status === 'completed' ? 'Completada' : 'En Progreso'}
                     </span>
                   </div>
@@ -218,24 +231,50 @@ export function CourseView() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Tipo de Actividad</label>
-                <select
-                  value={modalType}
-                  onChange={(e) => setModalType(e.target.value)}
-                  className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
-                >
-                  <option value="individual">Individual</option>
-                  <option value="collaborative">Colaborativa</option>
-                </select>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Categoría de la Actividad</label>
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalCategory('report')}
+                    className={`py-2 px-3 rounded-lg border text-sm font-medium transition-colors text-left flex flex-col ${modalCategory === 'report' ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400' : 'border-slate-300 dark:border-slate-800 text-slate-400 hover:bg-slate-800'}`}
+                  >
+                    <span>📄 Trabajo / Informe</span>
+                    <span className="text-[11px] opacity-70">Requiere entregar documento APA</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModalCategory('evaluation')}
+                    className={`py-2 px-3 rounded-lg border text-sm font-medium transition-colors text-left flex flex-col ${modalCategory === 'evaluation' ? 'border-amber-500 bg-amber-500/10 text-amber-400' : 'border-slate-300 dark:border-slate-800 text-slate-400 hover:bg-slate-800'}`}
+                  >
+                    <span>📝 Solo Evaluación / Quiz</span>
+                    <span className="text-[11px] opacity-70">Cuestionario en línea (sin informe)</span>
+                  </button>
+                </div>
               </div>
 
+              {modalCategory === 'report' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Modalidad de Trabajo</label>
+                  <select
+                    value={modalType}
+                    onChange={(e) => setModalType(e.target.value)}
+                    className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
+                  >
+                    <option value="individual">Individual</option>
+                    <option value="collaborative">Colaborativa</option>
+                  </select>
+                </div>
+              )}
+
               <div>
-                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Nombre del Tutor</label>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  Nombre del Tutor <span className="text-xs text-slate-400 font-normal">(Opcional - dejar vacío si no hay tutor)</span>
+                </label>
                 <input
                   type="text"
                   value={modalTutor}
                   onChange={(e) => setModalTutor(e.target.value)}
-                  placeholder="ej. Juan Pérez"
+                  placeholder="ej. Juan Pérez (o dejar vacío)"
                   className="w-full bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-cyan-500"
                 />
               </div>
